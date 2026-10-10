@@ -74,5 +74,28 @@
     return { offen: false, text: 'Geschlossen' };
   }
 
-  return { parse, status };
+  /** Macht OSM-Öffnungszeiten lesbar: eine Regel pro Zeile, deutsche Tage und Monate. */
+  function lesbar(text) {
+    if (!text) return '';
+    const TAG = { Mo: 'Mo', Tu: 'Di', We: 'Mi', Th: 'Do', Fr: 'Fr', Sa: 'Sa', Su: 'So' };
+    const MONAT = { Jan: 'Jan', Feb: 'Feb', Mar: 'Mär', Apr: 'Apr', May: 'Mai', Jun: 'Jun', Jul: 'Jul', Aug: 'Aug', Sep: 'Sep', Oct: 'Okt', Nov: 'Nov', Dec: 'Dez' };
+    return String(text).split(';').map((r) => r.trim()).filter(Boolean).map((r) => r
+      // häufige Sommer-/Winterzeit-Regeln (Zeitumstellung = letzter Sonntag im März/Oktober)
+      .replace(/^Mar Su\[-1\]\s*-\s*Oct Su\[-1\](\s*-1 days?)?:?\s*/i, 'Sommer: ')
+      .replace(/^Oct Su\[-1\]\s*-\s*Mar Su\[-1\](\s*-1 days?)?:?\s*/i, 'Winter: ')
+      .replace(/^([A-Z][a-z]{2})\s*-\s*([A-Z][a-z]{2})\s*:?\s+(?=[A-Z][a-z])/, '$1–$2: ')
+      .replace(/^PH\s+off$/i, 'Feiertags geschlossen')
+      .replace(/^PH\s+/i, 'Feiertags ')
+      .replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\[-1\]/g, (_, t) => `letzter ${TAG[t]}`)
+      .replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\[(\d)\]/g, (_, t, n) => `${n}. ${TAG[t]}`)
+      .replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\b/g, (t) => TAG[t])
+      .replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g, (m) => MONAT[m])
+      .replace(/\boff\b/g, 'geschlossen')
+      .replace(/-/g, '–')
+      .replace(/,(?=\d)/g, ', ')
+      .replace(/(\d{2}:\d{2})–(\d{2}:\d{2})/g, '$1–$2')
+    ).join('\n');
+  }
+
+  return { parse, status, lesbar };
 });

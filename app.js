@@ -283,7 +283,7 @@ function hoefeHtml(offiziell, osm) {
       <h3>${esc(h.name)}</h3>
       ${h.adresse ? `<div class="adr">${esc(h.adresse)}</div>` : ''}
       ${st ? `<div class="zustand ${st.offen ? 'offen' : 'zu'}">${esc(st.text)}</div>` : ''}
-      ${h.oeffnungszeiten_text ? `<div class="zeiten">${esc(h.oeffnungszeiten_text)}</div>` : (!st && h.oeffnungszeiten_osm ? `<div class="zeiten">${esc(h.oeffnungszeiten_osm)}</div>` : '')}
+      ${h.oeffnungszeiten_text ? `<div class="zeiten">${esc(h.oeffnungszeiten_text)}</div>` : (h.oeffnungszeiten_osm ? `<div class="zeiten">${esc(Oeffnung.lesbar(h.oeffnungszeiten_osm))}</div>` : '')}
       ${annahme.length ? `<div class="marken">${annahme.map((a) => `<span class="marke">${esc(a)}</span>`).join('')}</div>` : ''}
       <div class="zeile">
         <button class="knopf klein" type="button" data-link="${esc(routeUrl(h))}">Route</button>
