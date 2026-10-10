@@ -27,9 +27,9 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon, ratgeber] = await Promise.all([
-    fetch('daten/fraktionen.json?v=f8f2090').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=f8f2090').then((r) => r.json()),
-    fetch('daten/ratgeber.json?v=f8f2090').then((r) => r.json()).catch(() => null),
+    fetch('daten/fraktionen.json?v=a6da91e').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=a6da91e').then((r) => r.json()),
+    fetch('daten/ratgeber.json?v=a6da91e').then((r) => r.json()).catch(() => null),
   ]);
   Z.stamm = stamm;
   Z.ratgeber = ratgeber;
