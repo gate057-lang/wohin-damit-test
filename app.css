@@ -280,3 +280,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .update-hinweis { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 0; padding: 12px 14px;
   background: var(--akzent-hell); border: 1px solid color-mix(in srgb, var(--akzent) 30%, var(--linie)); border-radius: 16px; font-size: 15px; }
 .update-hinweis span { flex: 1 1 180px; }
+
+/* Orts-Knopf oben: pulsiert dezent (heller/dunkler), damit er auffällt */
+.ort-chip { animation: ortPuls 2.6s ease-in-out infinite; cursor: pointer; }
+@keyframes ortPuls {
+  0%, 100% { background: var(--flaeche); border-color: var(--linie); box-shadow: 0 0 0 0 transparent; }
+  50% { background: var(--akzent-hell); border-color: color-mix(in srgb, var(--akzent) 45%, var(--linie)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--akzent) 14%, transparent); }
+}
+.ort-chip.sucht svg { animation: ortSucht .9s ease-in-out infinite; }
+@keyframes ortSucht { 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .ort-chip, .ort-chip.sucht svg { animation: none; } }

@@ -27,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=db25fa2').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=db25fa2').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=8263418').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=8263418').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -89,20 +89,28 @@ function setzeRegion(ort, profil) {
   if (Z.ansicht === 'region') zeichneRegion();
 }
 
-async function standortBestimmen() {
+async function standortBestimmen(frisch = false) {
+  const chip = $('#ortChip');
+  if (chip.classList.contains('sucht')) return;
+  chip.classList.add('sucht');
   try {
     $('#ortName').textContent = 'Standort wird bestimmt …';
-    const pos = await P.standort();
+    $('#ortKreis').textContent = '';
+    const pos = await P.standort(frisch);
     const d = await P.api(`/ort?lat=${pos.lat}&lon=${pos.lon}`);
     setzeRegion(d.ort, d.profil);
+    Z.hoefe = null;
   } catch (f) {
     zeichneKopf();
-    if (!Z.ort) {
+    if (Z.ort) alert(f.message);
+    else {
       const karte = $('#regionKarte');
       karte.hidden = false;
       karte.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/></svg>
         <p>${esc(f.message)} <button class="textknopf" type="button" data-zu="region">Ort eingeben</button></p>`;
     }
+  } finally {
+    chip.classList.remove('sucht');
   }
 }
 
@@ -596,7 +604,8 @@ function verdrahte() {
     } else if (el.dataset.melden !== undefined) melden(el.dataset.melden, el.dataset.name);
   });
 
-  $('#ortChip').addEventListener('click', () => zeige('region'));
+  // Tipp auf den Ort oben: sofort den aktuellen Standort holen (anderen Ort wählen: Reiter „Region“)
+  $('#ortChip').addEventListener('click', () => standortBestimmen(true));
 
   // Strichcode
   $('#barcodeKnopf').hidden = !Barcode.kannErkennen();
@@ -648,7 +657,7 @@ function verdrahte() {
     }
   });
   $('#fotoEingabe').addEventListener('change', (e) => fotoAuswerten(e.target.files[0]));
-  $('#standortNeu').addEventListener('click', async () => { laden('Standort wird bestimmt …'); await standortBestimmen(); laden(null); zeichneRegion(); });
+  $('#standortNeu').addEventListener('click', async () => { laden('Standort wird bestimmt …'); await standortBestimmen(true); laden(null); zeichneRegion(); });
 
   const feld = $('#suchFeld');
   feld.addEventListener('input', () => sucheAnzeigen(feld.value));

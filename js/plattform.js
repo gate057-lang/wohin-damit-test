@@ -89,10 +89,10 @@
   }
 
   /** Aktueller Standort. Nativ über das Geolocation-Plugin, sonst Browser. */
-  async function standort() {
+  async function standort(frisch = false) {
     const plugin = nativ && cap.Plugins && cap.Plugins.Geolocation;
     if (plugin) {
-      const p = await plugin.getCurrentPosition({ enableHighAccuracy: false, timeout: 15000 });
+      const p = await plugin.getCurrentPosition({ enableHighAccuracy: frisch, timeout: 15000, maximumAge: frisch ? 0 : 600000 });
       return { lat: p.coords.latitude, lon: p.coords.longitude };
     }
     if (!navigator.geolocation) throw new Error('Dein Gerät gibt keinen Standort frei.');
@@ -102,7 +102,7 @@
         (f) => nein(new Error(f.code === 1
           ? 'Standort nicht freigegeben. Du kannst deinen Ort auch unter „Region“ eingeben.'
           : 'Standort konnte nicht bestimmt werden.')),
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10 * 60 * 1000 }
+        { enableHighAccuracy: frisch, timeout: 15000, maximumAge: frisch ? 0 : 10 * 60 * 1000 }
       );
     });
   }
