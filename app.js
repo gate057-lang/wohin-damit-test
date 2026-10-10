@@ -24,8 +24,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json').then((r) => r.json()),
-    fetch('daten/lexikon.json').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=ee50fa4').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=ee50fa4').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -263,7 +263,12 @@ async function zeichneOrte() {
     ziel.innerHTML = offiziell.length ? hoefeHtml(offiziell, []) : '<p class="leer">Wird geladen …</p>';
     try { Z.hoefe = (await P.api(`/hoefe?lat=${Z.ort.lat}&lon=${Z.ort.lon}`)).hoefe; } catch { Z.hoefe = []; }
   }
-  ziel.innerHTML = hoefeHtml(offiziell, Z.hoefe);
+  try {
+    ziel.innerHTML = hoefeHtml(offiziell, Z.hoefe);
+  } catch (f) {
+    ziel.innerHTML = '<p class="leer">Die Wertstoffhöfe konnten nicht angezeigt werden. Bitte die Seite neu laden.</p>';
+    console.error(f);
+  }
 }
 
 function hoefeHtml(offiziell, osm) {
