@@ -238,3 +238,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border: 0; background: transparent; border-radius: 16px; padding: 7px 4px; font-size: 12.5px; color: var(--leise); min-height: 52px;
 }
 .leiste button.aktiv { background: var(--akzent-hell); color: var(--akzent); font-weight: 650; }
+
+/* Termine */
+.abholung { padding: 14px 18px; }
+.abholung-titel { margin: 0 0 6px; font-size: 13px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; color: var(--leise); }
+.abholung-zeile { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 15.5px; }
+.abholung-zeile .a-wann { min-width: 92px; color: var(--leise); }
+.abholung-zeile .a-was { font-weight: 600; }
+.abholung-zeile.bald .a-wann { color: var(--akzent); font-weight: 700; }
+.abholung-leer { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; border: 0; background: transparent; padding: 0; }
+.abholung-leer svg { color: var(--akzent); margin-top: 2px; }
+.abholung-leer span { display: grid; gap: 2px; }
+.abholung-leer small { color: var(--leise); font-size: 14px; }
+.punkt { display: inline-block; width: 12px; height: 12px; border-radius: 4px; flex: none; }
+.naechste { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--flaeche-2); border-radius: 12px; font-size: 15px; }
+.monat { font-size: 15px; margin: 22px 0 6px; color: var(--leise); font-weight: 650; }
+.termine-liste { padding: 6px 18px; margin-top: 0; }
+.termin { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--linie); font-size: 15px; }
+.termin:last-child { border-bottom: 0; }
+.termin .t-tag { min-width: 92px; color: var(--leise); }
+.termin .t-was { font-weight: 600; }
+.termin small { font-weight: 400; color: var(--leise); }
+.schalter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; margin: 6px 0 4px; }
+.schalter input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--akzent); }
+.schalter select { font: inherit; color: var(--tinte); background: var(--flaeche-2); border: 1px solid var(--linie); border-radius: 10px; padding: 6px 8px; min-height: 40px; }
+.schnell .wahl { display: inline-flex; align-items: center; gap: 8px; opacity: .55; }
+.schnell .wahl.an { opacity: 1; border-color: var(--akzent); background: var(--akzent-hell); }
+.klein-feld { box-shadow: none; margin: 10px 0 4px; }
+.klein-feld input { padding-left: 2px; }
+.karte > p:first-child { margin-top: 0; }

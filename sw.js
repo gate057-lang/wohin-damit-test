@@ -2,10 +2,10 @@
    Programmdateien kommen bevorzugt frisch aus dem Netz, ohne Netz aus dem
    Zwischenspeicher. Lexikon und Grundregeln sind so auch offline verfügbar.
    API-Aufrufe fasst der Service Worker nie an. */
-const VERSION = 'wohin-test-ee50fa4';
+const VERSION = 'wohin-test-f5db2c7';
 const HUELLE = [
   './', './index.html', './app.css', './app.js', './manifest.webmanifest',
-  './js/regeln.js', './js/ort-logik.js', './js/plattform.js', './js/oeffnungszeiten.js',
+  './js/regeln.js', './js/ort-logik.js', './js/termine.js', './js/plattform.js', './js/oeffnungszeiten.js',
   './daten/fraktionen.json', './daten/lexikon.json',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
   './impressum.html', './datenschutz.html', './kontakt.html', './rechtstexte.css',
@@ -37,4 +37,25 @@ self.addEventListener('fetch', (e) => {
       })
       .catch(() => caches.match(e.request, { ignoreSearch: true }).then((t) => t || caches.match('./index.html')))
   );
+});
+
+// Erinnerung am Vorabend (Web-Push vom Server)
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { text: e.data && e.data.text() }; }
+  e.waitUntil(self.registration.showNotification(d.titel || 'Wohin damit?', {
+    body: d.text || '',
+    tag: d.tag || 'wohin',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    data: { url: './#termine' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window' }).then((fenster) => {
+    for (const f of fenster) if ('focus' in f) return f.focus();
+    return self.clients.openWindow(e.notification.data && e.notification.data.url || './');
+  }));
 });

@@ -16,6 +16,9 @@ const Z = {
   hoefe: null,
   ansicht: 'start',
   abfrageTimer: null,
+  termine: P.speicher.lesen('termine'),          // { liste, quelle: {art, url}, stand }
+  erinnerung: P.speicher.lesen('erinnerung', { an: false, uhrzeit: '19:00', auswahl: null }),
+  fotoAktiv: true,
 };
 
 const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', 'Styropor', 'Sofa', 'Medikamente'];
@@ -24,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=ee50fa4').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=ee50fa4').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=f5db2c7').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=f5db2c7').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -38,6 +41,7 @@ function zeige(ansicht) {
     b.classList.toggle('aktiv', b.dataset.zu === ansicht || (ansicht === 'ergebnis' && b.dataset.zu === 'start'));
   }
   if (ansicht === 'orte') zeichneOrte();
+  if (ansicht === 'termine') zeichneTermine();
   if (ansicht === 'region') zeichneRegion();
   window.scrollTo({ top: 0 });
 }
@@ -80,6 +84,7 @@ function setzeRegion(ort, profil) {
   P.speicher.schreiben('ort', ort);
   P.speicher.schreiben('profil', profil);
   zeichneKopf();
+  zeichneAbholung();
   beobachteRecherche();
   if (Z.ansicht === 'region') zeichneRegion();
 }
@@ -154,8 +159,12 @@ function naechsterSchritt(e) {
     const url = o ? `https://www.google.com/maps/search/${encodeURIComponent(was)}/@${o.lat},${o.lon},14z` : `https://www.google.com/maps/search/${encodeURIComponent(was)}`;
     return `<div class="aktionen"><button class="knopf zweit" type="button" data-link="${esc(url)}">${was} auf der Karte</button></div>`;
   }
-  if (['rest', 'bio', 'papier', 'verpackung'].includes(e.fraktion) && p.termine && p.termine.url) {
-    return `<div class="aktionen"><button class="knopf zweit" type="button" data-link="${esc(p.termine.url)}">Abfuhrkalender ansehen</button></div>`;
+  if (['rest', 'bio', 'papier', 'verpackung', 'gruengut', 'schadstoff'].includes(e.fraktion)) {
+    const t = Z.termine && Termine.naechster(Z.termine.liste, e.fraktion);
+    if (t) return `<div class="naechste"><span class="punkt" style="background:${esc(e.farbe)}"></span>Nächste Abholung: <strong>${esc(Termine.wann(t.datum))}</strong></div>`;
+    if (['rest', 'bio', 'papier', 'verpackung'].includes(e.fraktion)) {
+      return `<div class="aktionen"><button class="knopf zweit" type="button" data-zu="termine">Abfuhrtermine einrichten</button></div>`;
+    }
   }
   return '';
 }
@@ -320,6 +329,148 @@ function sperrmuellHtml(kurz) {
   </article>`;
 }
 
+/* ------------------------------ Termine ------------------------------ */
+
+const HAUSHALT = ['rest', 'bio', 'papier', 'verpackung', 'glas', 'gruengut', 'schadstoff', 'sperrmuell', 'elektro', 'textil'];
+const namenFuer = (f) => Regeln.entscheide({ n: '', f, h: '' }, Z.profil, Z.stamm).behaelter;
+const farbeFuer = (f) => Regeln.entscheide({ n: '', f, h: '' }, Z.profil, Z.stamm).farbe;
+function alleNamen() {
+  return Object.fromEntries(HAUSHALT.map((f) => [f, namenFuer(f)]));
+}
+
+function zeichneAbholung() {
+  const k = $('#abholungKarte');
+  if (!Z.ort) { k.hidden = true; return; }
+  k.hidden = false;
+  const naechste = Z.termine ? Termine.kommende(Z.termine.liste, Termine.heute(), 3) : [];
+  if (!Z.termine) {
+    k.innerHTML = `<button class="abholung-leer" type="button" data-zu="termine">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span><strong>Abfuhrtermine einrichten</strong><small>Dann siehst du hier, welche Tonne als Nächstes dran ist – auf Wunsch mit Erinnerung am Vorabend.</small></span></button>`;
+    return;
+  }
+  if (!naechste.length) {
+    k.innerHTML = `<p class="leer">Keine kommenden Termine mehr im Kalender. <button class="textknopf" type="button" data-zu="termine">Aktualisieren</button></p>`;
+    return;
+  }
+  k.innerHTML = `<p class="abholung-titel">Nächste Abholung</p>` + naechste.map((t) => `
+    <div class="abholung-zeile ${Termine.wann(t.datum) === 'morgen' ? 'bald' : ''}">
+      <span class="punkt" style="background:${esc(farbeFuer(t.fraktion))}"></span>
+      <span class="a-wann">${esc(Termine.wann(t.datum))}</span>
+      <span class="a-was">${esc(namenFuer(t.fraktion))}</span>
+    </div>`).join('') + `<button class="textknopf" type="button" data-zu="termine">Alle Termine</button>`;
+}
+
+function setzeTermine(liste, quelle) {
+  Z.termine = { liste, quelle, stand: new Date().toISOString() };
+  P.speicher.schreiben('termine', Z.termine);
+  zeichneAbholung();
+  if (Z.erinnerung.an) erinnerungEinrichten(true);
+  zeichneTermine();
+}
+
+function zeichneTermine() {
+  const ziel = $('#termineInhalt');
+  const einrichten = $('#termineEinrichten');
+  $('#kalenderFotoKnopf').hidden = !Z.fotoAktiv;
+  const p = Z.profil;
+  $('#entsorgerKalender').innerHTML = p && p.termine && p.termine.url
+    ? `<button class="knopf zweit" type="button" data-link="${esc(p.termine.url)}">Kalender deines Entsorgers</button>` : '';
+  if (p && p.termine && p.termine.typ === 'ics' && p.termine.url && !$('#icsLink').value) $('#icsLink').value = p.termine.url;
+
+  if (!Z.termine) {
+    einrichten.hidden = false;
+    ziel.innerHTML = `<p class="leer">Hol dir die Termine deiner Straße einmal in die App. Danach siehst du jederzeit, welche Tonne dran ist.</p>`;
+    return;
+  }
+  einrichten.hidden = !Z.termineBearbeiten;
+  const kommend = Termine.kommende(Z.termine.liste, Termine.heute(), 60);
+  const monate = {};
+  for (const t of kommend) {
+    const m = new Date(t.datum + 'T12:00:00').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    (monate[m] = monate[m] || []).push(t);
+  }
+  const vorhanden = [...new Set(Z.termine.liste.map((t) => t.fraktion))];
+  const auswahl = Z.erinnerung.auswahl || vorhanden;
+  const geht = P.erinnerung.moeglich();
+  const quelleText = { url: 'Kalender-Link', datei: 'ICS-Datei', foto: 'Foto des Kalenders' }[Z.termine.quelle && Z.termine.quelle.art] || 'Import';
+
+  ziel.innerHTML = `
+    <article class="karte">
+      <p><strong>Erinnerung am Vorabend</strong></p>
+      ${geht.ok ? `
+        <label class="schalter"><input type="checkbox" id="erinnerungAn" ${Z.erinnerung.an ? 'checked' : ''}><span>Erinnern um</span>
+          <select id="erinnerungZeit">${['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'].map((z) => `<option ${z === Z.erinnerung.uhrzeit ? 'selected' : ''}>${z}</option>`).join('')}</select> Uhr</label>
+        <div class="schnell">${vorhanden.map((f) => `<button type="button" class="wahl ${auswahl.includes(f) ? 'an' : ''}" data-erinnern="${esc(f)}"><span class="punkt" style="background:${esc(farbeFuer(f))}"></span>${esc(namenFuer(f))}</button>`).join('')}</div>
+        ${Z.erinnerung.an ? `<button class="textknopf" type="button" id="erinnerungTest">Test-Erinnerung senden</button>` : ''}
+      ` : `<p class="leer">${esc(geht.grund)}</p>`}
+    </article>
+    ${Object.entries(monate).map(([m, liste]) => `
+      <h3 class="monat">${esc(m)}</h3>
+      <article class="karte termine-liste">${liste.map((t) => `
+        <div class="termin">
+          <span class="punkt" style="background:${esc(farbeFuer(t.fraktion))}"></span>
+          <span class="t-tag">${esc(Termine.wann(t.datum))}</span>
+          <span class="t-was">${esc(namenFuer(t.fraktion))}${t.erkannt === false ? ` <small>(${esc(t.bezeichnung)})</small>` : ''}</span>
+        </div>`).join('')}</article>`).join('') || '<p class="leer">Keine kommenden Termine.</p>'}
+    <div class="aktionen">
+      ${Z.termine.quelle && Z.termine.quelle.url ? `<button class="knopf zweit klein" type="button" id="termineNeu">Aktualisieren</button>` : ''}
+      <button class="knopf zweit klein" type="button" id="termineExport">In meinen Kalender</button>
+      <button class="knopf zweit klein" type="button" id="termineQuelle">${Z.termineBearbeiten ? 'Fertig' : 'Andere Quelle'}</button>
+      <button class="textknopf" type="button" id="termineWeg">Termine entfernen</button>
+    </div>
+    <p class="quelle">Quelle: ${esc(quelleText)} · Stand ${new Date(Z.termine.stand).toLocaleDateString('de-DE')}</p>`;
+}
+
+async function icsVonLink(url) {
+  laden('Termine werden geladen …');
+  try {
+    const d = await P.api('/termine/ics', { daten: { url } });
+    setzeTermine(d.termine, { art: 'url', url });
+    Z.termineBearbeiten = false;
+    zeichneTermine();
+  } catch (f) { alert(f.message); } finally { laden(null); }
+}
+
+async function icsAusDatei(datei) {
+  if (!datei) return;
+  try {
+    const liste = Termine.ausIcs(await datei.text());
+    if (!liste.length) throw new Error('In der Datei stehen keine Termine.');
+    Z.termineBearbeiten = false;
+    setzeTermine(liste, { art: 'datei' });
+  } catch (f) { alert(f.message); } finally { $('#icsDatei').value = ''; }
+}
+
+async function kalenderAusFoto(datei) {
+  if (!datei) return;
+  laden('Ich lese den Kalender …');
+  try {
+    const bild = await P.bildVerkleinern(datei, 2000, 0.88);
+    const d = await P.api('/kalender-foto', { daten: { bild } });
+    if (!d.termine.length) throw new Error(d.hinweis || 'Ich konnte keine Termine lesen. Versuch es mit einem schärferen Foto.');
+    Z.termineBearbeiten = false;
+    setzeTermine(d.termine.map((t) => ({ ...t, erkannt: true })).sort((a, b) => a.datum.localeCompare(b.datum)), { art: 'foto' });
+    if (d.hinweis) alert(d.hinweis);
+  } catch (f) { alert(f.message); } finally { laden(null); $('#kalenderFoto').value = ''; }
+}
+
+async function erinnerungEinrichten(still) {
+  const e = Z.erinnerung;
+  try {
+    if (e.an && Z.termine) {
+      await P.erinnerung.einrichten({ termine: Termine.kommende(Z.termine.liste, Termine.heute(), 400), uhrzeit: e.uhrzeit, auswahl: e.auswahl, namen: alleNamen() });
+    } else {
+      await P.erinnerung.beenden();
+    }
+  } catch (f) {
+    e.an = false;
+    if (!still) alert(f.message);
+  }
+  P.speicher.schreiben('erinnerung', e);
+  if (Z.ansicht === 'termine') zeichneTermine();
+}
+
 /* ------------------------------ Region ------------------------------ */
 
 function zeichneRegion() {
@@ -398,6 +549,48 @@ function verdrahte() {
   });
 
   $('#ortChip').addEventListener('click', () => zeige('region'));
+
+  // Termine
+  $('#icsLaden').addEventListener('click', () => {
+    const url = $('#icsLink').value.trim();
+    if (!url) { alert('Bitte zuerst den Kalender-Link einfügen.'); return; }
+    icsVonLink(url);
+  });
+  $('#icsDatei').addEventListener('change', (e) => icsAusDatei(e.target.files[0]));
+  $('#kalenderFoto').addEventListener('change', (e) => kalenderAusFoto(e.target.files[0]));
+  const ti = $('#termineInhalt');
+  ti.addEventListener('change', (e) => {
+    if (e.target.id === 'erinnerungAn') { Z.erinnerung.an = e.target.checked; erinnerungEinrichten(false); }
+    if (e.target.id === 'erinnerungZeit') { Z.erinnerung.uhrzeit = e.target.value; erinnerungEinrichten(false); }
+  });
+  ti.addEventListener('click', async (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.erinnern) {
+      const alle = [...new Set(Z.termine.liste.map((t) => t.fraktion))];
+      const a = new Set(Z.erinnerung.auswahl || alle);
+      a.has(b.dataset.erinnern) ? a.delete(b.dataset.erinnern) : a.add(b.dataset.erinnern);
+      Z.erinnerung.auswahl = [...a];
+      if (Z.erinnerung.an) erinnerungEinrichten(false); else { P.speicher.schreiben('erinnerung', Z.erinnerung); zeichneTermine(); }
+    } else if (b.id === 'erinnerungTest') {
+      try { await P.erinnerung.test(); } catch (f) { alert(f.message); }
+    } else if (b.id === 'termineNeu') {
+      icsVonLink(Z.termine.quelle.url);
+    } else if (b.id === 'termineExport') {
+      P.speichereDatei('abfuhrtermine.ics', Termine.zuIcs(Termine.kommende(Z.termine.liste, Termine.heute(), 400), alleNamen()), 'text/calendar');
+    } else if (b.id === 'termineQuelle') {
+      Z.termineBearbeiten = !Z.termineBearbeiten;
+      zeichneTermine();
+    } else if (b.id === 'termineWeg') {
+      if (!confirm('Alle Abfuhrtermine aus der App entfernen?')) return;
+      Z.termine = null;
+      P.speicher.schreiben('termine', null);
+      Z.erinnerung.an = false;
+      await erinnerungEinrichten(true);
+      zeichneAbholung();
+      zeichneTermine();
+    }
+  });
   $('#fotoEingabe').addEventListener('change', (e) => fotoAuswerten(e.target.files[0]));
   $('#standortNeu').addEventListener('click', async () => { laden('Standort wird bestimmt …'); await standortBestimmen(); laden(null); zeichneRegion(); });
 
@@ -429,10 +622,14 @@ async function start() {
   verdrahte();
   await ladeDaten();
   zeichneKopf();
+  zeichneAbholung();
+  if (location.hash === '#termine') zeige('termine');
+  P.api('/health').then((h) => { Z.fotoAktiv = h.foto; }).catch(() => { Z.fotoAktiv = false; });
   if (Z.ort) {
     beobachteRecherche();
     // Profil im Hintergrund auffrischen
-    P.api('/region/' + Z.ort.key).then((d) => setzeRegion(Z.ort, d.profil)).catch(() => {});
+    // (startet auf dem Server bei Bedarf die Recherche, z. B. wenn bisher nur Grundregeln vorlagen)
+    P.api(`/ort?lat=${Z.ort.lat}&lon=${Z.ort.lon}`).then((d) => setzeRegion(d.ort, d.profil)).catch(() => {});
   } else {
     standortBestimmen();
   }
