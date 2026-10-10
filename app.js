@@ -27,9 +27,9 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon, ratgeber] = await Promise.all([
-    fetch('daten/fraktionen.json?v=3711a7f').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=3711a7f').then((r) => r.json()),
-    fetch('daten/ratgeber.json?v=3711a7f').then((r) => r.json()).catch(() => null),
+    fetch('daten/fraktionen.json?v=7159bb0').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=7159bb0').then((r) => r.json()),
+    fetch('daten/ratgeber.json?v=7159bb0').then((r) => r.json()).catch(() => null),
   ]);
   Z.stamm = stamm;
   Z.ratgeber = ratgeber;
@@ -40,8 +40,9 @@ function zeige(ansicht) {
   Z.ansicht = ansicht;
   for (const s of document.querySelectorAll('.ansicht')) s.hidden = s.id !== 'ansicht-' + ansicht;
   for (const b of document.querySelectorAll('.leiste button')) {
-    b.classList.toggle('aktiv', b.dataset.zu === ansicht || (ansicht === 'ergebnis' && b.dataset.zu === 'start'));
+    b.classList.toggle('aktiv', b.dataset.zu === ansicht || ((ansicht === 'ergebnis' || ansicht === 'markieren') && b.dataset.zu === 'start'));
   }
+  if (ansicht !== 'start' && Z.korrektur) korrekturEnde();
   if (ansicht === 'orte') zeichneOrte();
   if (ansicht === 'termine') zeichneTermine();
   if (ansicht === 'region') zeichneRegion();
@@ -164,10 +165,7 @@ function naechsterSchritt(e) {
       ${e.fraktion === 'schadstoff' && p.schadstoff && p.schadstoff.url ? `<button class="knopf zweit" type="button" data-link="${esc(p.schadstoff.url)}">Schadstoffmobil-Termine</button>` : ''}</div>`;
   }
   if (e.fraktion === 'glas' || e.fraktion === 'textil') {
-    const was = e.fraktion === 'glas' ? 'Altglascontainer' : 'Altkleidercontainer';
-    const o = Z.ort;
-    const url = o ? `https://www.google.com/maps/search/${encodeURIComponent(was)}/@${o.lat},${o.lon},14z` : `https://www.google.com/maps/search/${encodeURIComponent(was)}`;
-    return `<div class="aktionen"><button class="knopf zweit" type="button" data-link="${esc(url)}">${was} auf der Karte</button></div>`;
+    return `<div data-umgebung="${e.fraktion}" data-max="3"><p class="leer">Container in der Nähe werden gesucht …</p></div>`;
   }
   if (['rest', 'bio', 'papier', 'verpackung', 'gruengut', 'schadstoff'].includes(e.fraktion)) {
     const t = Z.termine && Termine.naechster(Z.termine.liste, e.fraktion);
@@ -197,15 +195,28 @@ function ergebnisKarte(e, extra = {}) {
       ${e.hinweis ? `<p>${esc(e.hinweis)}</p>` : ''}
       ${regionText}${unsicher}${teile}${allgemein}
       ${naechsterSchritt(e)}
-      <div class="aktionen"><button class="textknopf" type="button" data-melden="${esc(e.lexikon_id || '')}" data-name="${esc(e.gegenstand)}">Stimmt nicht?</button></div>
+      ${e.verschenkbar ? `<div class="karte verschenken"><p><strong>Noch gut?</strong> Verschenken statt wegwerfen – das freut andere und spart dir den Weg.</p>
+        <div data-umgebung="verschenken" data-fuer="${esc(e.lexikon_id || '')}" data-max="4" data-spaeter="1">
+          <button class="knopf zweit klein" type="button" data-umgebung-laden>Orte zum Weitergeben in der Nähe</button></div></div>` : ''}
+      ${extra.gelernt ? '<p class="gelernt-hinweis">✓ Aus Korrekturen gelernt</p>' : ''}
+      <div class="aktionen"><button class="textknopf" type="button" data-melden="${esc(e.lexikon_id || '')}" data-name="${esc(e.gegenstand)}" data-eid="${esc(extra.erkennung_id || '')}">Stimmt nicht?</button></div>
     </div>
   </article>`;
 }
 
-function zeigeEintrag(eintrag) {
+function zeigeEintrag(eintrag, lernId) {
   const e = Regeln.entscheide(eintrag, Z.profil, Z.stamm);
-  $('#ergebnisInhalt').innerHTML = ergebnisKarte(e);
+  // Korrektur eines Fotos: der gewählte Eintrag ist die richtige Antwort → Erkennung lernt
+  const eid = lernId || Z.korrektur;
+  let dank = '';
+  if (eid && eintrag.id) {
+    lernen(eid, eintrag.id);
+    dank = '<p class="gelernt-hinweis">✓ Danke! Die Erkennung lernt daraus.</p>';
+  }
+  korrekturEnde();
+  $('#ergebnisInhalt').innerHTML = ergebnisKarte(e) + dank;
   zeige('ergebnis');
+  fuelleUmgebung($('#ergebnisInhalt'));
 }
 
 async function fotoAuswerten(datei) {
@@ -213,19 +224,11 @@ async function fotoAuswerten(datei) {
   laden('Ich schaue mir das an …');
   try {
     const bild = await P.bildVerkleinern(datei);
+    Z.letztesFoto = bild;
     const d = await P.api('/erkennen', { daten: { bild, region_key: Z.ort && Z.ort.key } });
-    if (!d.gegenstaende.length) {
-      $('#ergebnisInhalt').innerHTML = `<article class="karte"><p><strong>Ich habe nichts erkannt.</strong></p>
-        <p class="leer">${esc(d.unklar_grund || 'Versuche es mit mehr Licht und dem Gegenstand formatfüllend im Bild.')}</p>
-        <div class="aktionen"><label class="knopf" for="fotoEingabe">Noch ein Foto</label></div></article>`;
-    } else {
-      const alt = (d.alternativen || []).length
-        ? `<article class="karte"><p><strong>Nicht richtig erkannt?</strong> Vielleicht ist es:</p>
-            <div class="schnell">${d.alternativen.map((a) => `<button type="button" data-id="${esc(a.lexikon_id)}" data-wort="${esc(a.bezeichnung)}">${esc(a.bezeichnung)}</button>`).join('')}</div>
-            <p class="leer">Oder such den Gegenstand oben über die Suche.</p></article>` : '';
-      $('#ergebnisInhalt').innerHTML = d.gegenstaende.map((g) => ergebnisKarte(g.ergebnis, { ...g, sicherheit: d.alternativen && d.alternativen.length ? 1 : g.sicherheit })).join('') + alt;
-    }
+    $('#ergebnisInhalt').innerHTML = fotoErgebnisHtml(d, true);
     zeige('ergebnis');
+    fuelleUmgebung($('#ergebnisInhalt'));
   } catch (f) {
     $('#ergebnisInhalt').innerHTML = `<article class="karte fehler"><p><strong>Das hat nicht geklappt.</strong></p><p>${esc(f.message)}</p>
       <p class="leer">Du kannst den Gegenstand auch über die Suche finden.</p></article>`;
@@ -234,6 +237,193 @@ async function fotoAuswerten(datei) {
     laden(null);
     $('#fotoEingabe').value = '';
   }
+}
+
+/** Ergebnis einer Foto-Erkennung als HTML (eine oder mehrere Karten). */
+function fotoErgebnisHtml(d, mitMarkieren, titel) {
+  const eid = d.erkennung_id || '';
+  const kopf = titel ? `<h3 class="monat">${esc(titel)}</h3>` : '';
+  if (!d.gegenstaende.length) {
+    const alt = (d.alternativen || []).length
+      ? `<p>Vielleicht ist es:</p><div class="schnell">${d.alternativen.map((a) => `<button type="button" data-id="${esc(a.lexikon_id)}" data-wort="${esc(a.bezeichnung)}" data-lernen="${esc(eid)}">${esc(a.bezeichnung)}</button>`).join('')}</div>` : '';
+    return `${kopf}<article class="karte"><p><strong>Ich habe nichts sicher erkannt.</strong></p>
+      <p class="leer">${esc(d.unklar_grund || 'Versuche es mit mehr Licht und dem Gegenstand formatfüllend im Bild.')}</p>${alt}
+      <div class="aktionen"><label class="knopf" for="fotoEingabe">Noch ein Foto</label>
+      ${eid ? `<button class="knopf zweit" type="button" data-korrigieren="${esc(eid)}">Richtigen Gegenstand suchen</button>` : ''}</div></article>`;
+  }
+  const alt = (d.alternativen || []).length
+    ? `<article class="karte"><p><strong>Nicht richtig erkannt?</strong> Vielleicht ist es:</p>
+        <div class="schnell">${d.alternativen.map((a) => `<button type="button" data-id="${esc(a.lexikon_id)}" data-wort="${esc(a.bezeichnung)}" data-lernen="${esc(eid)}">${esc(a.bezeichnung)}</button>`).join('')}</div>
+        <div class="aktionen"><button class="textknopf" type="button" data-korrigieren="${esc(eid)}">Etwas anderes – selbst suchen</button></div></article>` : '';
+  const markieren = mitMarkieren && Z.letztesFoto
+    ? `<article class="karte hinweis-karte"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="8" rx="1.5"/><rect x="13" y="11" width="8" height="8" rx="1.5"/></svg>
+        <p>Mehrere Teile im Bild, z. B. Becher und Deckel? <button class="textknopf" type="button" id="zumMarkieren">Teile einzeln markieren</button></p></article>` : '';
+  return kopf + d.gegenstaende.map((g) => ergebnisKarte(g.ergebnis, {
+    ...g, erkennung_id: eid, gelernt: d.gelernt,
+    sicherheit: d.alternativen && d.alternativen.length ? 1 : g.sicherheit,
+  })).join('') + alt + markieren;
+}
+
+/* ------------------------------ Umgebung (Container, Verschenken) ------------------------------ */
+
+const umgebungCache = new Map();
+async function umgebung(art) {
+  if (!Z.ort) throw new Error('Lege zuerst deinen Standort fest.');
+  const k = `${art}|${Z.ort.lat.toFixed(3)}|${Z.ort.lon.toFixed(3)}`;
+  if (!umgebungCache.has(k)) {
+    umgebungCache.set(k, P.api(`/umgebung?art=${art}&lat=${Z.ort.lat}&lon=${Z.ort.lon}`).then((d) => d.orte)
+      .catch((f) => { umgebungCache.delete(k); throw f; }));
+  }
+  return umgebungCache.get(k);
+}
+
+function routeZu(o) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lon}`;
+}
+
+function ortListeHtml(orte) {
+  return `<ul class="ort-liste">${orte.map((o) => {
+    const st = Oeffnung.status(o.oeffnungszeiten_osm);
+    const unter = [o.name !== o.art ? o.art : '', o.adresse, st ? st.text : ''].filter(Boolean).join(' · ');
+    return `<li><span class="o-text"><strong>${esc(o.name)}</strong>${unter ? `<small>${esc(unter)}</small>` : ''}</span>
+      <span class="o-km">${o.km < 1 ? Math.round(o.km * 1000) + ' m' : o.km.toFixed(1).replace('.', ',') + ' km'}</span>
+      <button class="knopf klein" type="button" data-link="${esc(routeZu(o))}">Route</button></li>`;
+  }).join('')}</ul>`;
+}
+
+/** Bücherschränke nur für Bücher, Repair-Cafés nur für Reparierbares. */
+function passtZum(o, fuer) {
+  if (o.art === 'Bücherschrank') return ['buch', 'cd', 'videokassette'].includes(fuer);
+  if (o.art === 'Repair-Café') return ['kleingeraet', 'laptop', 'handy', 'spielzeug_elektro', 'fahrrad', 'kleidung', 'regenschirm', 'armbanduhr'].includes(fuer);
+  return true;
+}
+
+async function fuelleBereich(el) {
+  const art = el.dataset.umgebung, max = Number(el.dataset.max || 5), fuer = el.dataset.fuer || '';
+  el.innerHTML = '<p class="leer">Wird gesucht …</p>';
+  try {
+    const orte = (await umgebung(art)).filter((o) => art !== 'verschenken' || passtZum(o, fuer)).slice(0, max);
+    el.innerHTML = orte.length ? ortListeHtml(orte)
+      : `<p class="leer">${art === 'verschenken' ? 'In der Nähe ist nichts eingetragen. Tipp: Nachbarschafts-Gruppen oder Kleinanzeigen („Zu verschenken“).' : 'In der Nähe ist kein Container eingetragen – frag am Wertstoffhof.'}</p>`;
+  } catch (f) {
+    el.innerHTML = `<p class="leer">${esc(f.message)}</p>`;
+  }
+}
+
+function fuelleUmgebung(wurzel) {
+  for (const el of wurzel.querySelectorAll('[data-umgebung]')) if (!el.dataset.spaeter) fuelleBereich(el);
+}
+
+/* ------------------------------ Lernen aus Korrekturen ------------------------------ */
+
+function lernen(eid, lexikonId) {
+  if (!eid || !lexikonId) return;
+  P.api('/lernen', { daten: { erkennung_id: eid, lexikon_id: lexikonId } }).catch(() => {});
+}
+
+function korrekturStarten(eid) {
+  Z.korrektur = eid;
+  $('#korrekturHinweis').hidden = false;
+  zeige('start');
+  const f = $('#suchFeld');
+  f.value = '';
+  f.focus();
+  f.scrollIntoView({ block: 'center' });
+}
+
+function korrekturEnde() {
+  Z.korrektur = null;
+  $('#korrekturHinweis').hidden = true;
+}
+
+/* ------------------------------ Mehrere Teile markieren ------------------------------ */
+
+const M = { bild: null, rahmen: [], zieht: null };
+
+function markierenOeffnen() {
+  if (!Z.letztesFoto) return;
+  M.rahmen = [];
+  const img = new Image();
+  img.onload = () => {
+    M.bild = img;
+    const c = $('#markierBild');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    markierenZeichnen();
+    zeige('markieren');
+  };
+  img.src = Z.letztesFoto;
+}
+
+function markierenZeichnen() {
+  const c = $('#markierBild'), g = c.getContext('2d');
+  g.drawImage(M.bild, 0, 0);
+  const s = Math.max(2, c.width / 220);
+  const alle = M.zieht ? [...M.rahmen, M.zieht] : M.rahmen;
+  alle.forEach((r, i) => {
+    const x = Math.min(r.x1, r.x2), y = Math.min(r.y1, r.y2), w = Math.abs(r.x2 - r.x1), h = Math.abs(r.y2 - r.y1);
+    g.fillStyle = 'rgba(31,122,77,.18)'; g.fillRect(x, y, w, h);
+    g.lineWidth = s * 2; g.strokeStyle = '#ffffff'; g.strokeRect(x, y, w, h);
+    g.lineWidth = s; g.strokeStyle = '#1f7a4d'; g.strokeRect(x, y, w, h);
+    if (r !== M.zieht) {
+      g.fillStyle = '#1f7a4d'; g.beginPath(); g.arc(x + s * 9, y + s * 9, s * 8, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.font = `bold ${s * 10}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(String(i + 1), x + s * 9, y + s * 9.5);
+    }
+  });
+  $('#markierErkennen').disabled = !M.rahmen.length;
+  $('#markierErkennen').textContent = M.rahmen.length ? `${M.rahmen.length} ${M.rahmen.length === 1 ? 'Teil' : 'Teile'} erkennen` : 'Teile erkennen';
+}
+
+function punktImBild(ev) {
+  const c = $('#markierBild'), r = c.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) * (c.width / r.width), y: (ev.clientY - r.top) * (c.height / r.height) };
+}
+
+async function markierteErkennen() {
+  laden('Ich schaue mir die Teile an …');
+  try {
+    const teile = [];
+    for (const [i, r] of M.rahmen.entries()) {
+      const x = Math.min(r.x1, r.x2), y = Math.min(r.y1, r.y2), w = Math.abs(r.x2 - r.x1), h = Math.abs(r.y2 - r.y1);
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
+      c.getContext('2d').drawImage(M.bild, x, y, w, h, 0, 0, c.width, c.height);
+      const d = await P.api('/erkennen', { daten: { bild: c.toDataURL('image/jpeg', 0.85), region_key: Z.ort && Z.ort.key } });
+      teile.push(fotoErgebnisHtml(d, false, `Teil ${i + 1}`));
+    }
+    $('#ergebnisInhalt').innerHTML = teile.join('');
+    zeige('ergebnis');
+    fuelleUmgebung($('#ergebnisInhalt'));
+  } catch (f) { alert(f.message); } finally { laden(null); }
+}
+
+/* ------------------------------ Sprachsuche ------------------------------ */
+
+/** „Wohin mit dem alten Toaster?“ → „Toaster“ */
+function sprachAnfrage(text) {
+  return String(text).toLowerCase()
+    .replace(/[?!.,]/g, ' ')
+    .replace(/\b(wohin|wo|mit|kommt|kommen|gehört|gehören|gehoert|hin|rein|hinein|entsorge|entsorgen|entsorgt|ich|man|soll|kann|werfe|wegwerfen|weg|in|welche|tonne|müll)\b/g, ' ')
+    .replace(/\b(der|die|das|dem|den|des|ein|eine|einem|einen|einer|mein|meine|meinem|meinen|alt|alte|alten|alter|altes|kaputt|kaputte|kaputten|kaputtes|leer|leere|leeren|gebraucht|gebrauchte|gebrauchten)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+async function sprachSuche() {
+  const k = $('#mikroKnopf');
+  if (k.classList.contains('hoert')) return;
+  k.classList.add('hoert');
+  try {
+    const gesagt = await P.sprache.hoeren();
+    const q = sprachAnfrage(gesagt) || gesagt;
+    $('#suchFeld').value = q;
+    sucheAnzeigen(q);
+    const treffer = Regeln.suche(Z.index, q, 2);
+    if (treffer.length === 1 || (treffer[0] && Regeln.falte(treffer[0].wort) === Regeln.falte(q))) {
+      $('#suchTreffer').hidden = true;
+      zeigeEintrag({ ...treffer[0], n: treffer[0].wort });
+    }
+  } catch (f) { alert(f.message); } finally { k.classList.remove('hoert'); }
 }
 
 /* ------------------------------ Strichcode ------------------------------ */
@@ -322,7 +512,15 @@ const STOFFE = { electrical_appliances: 'Elektro', batteries: 'Batterien', glass
   shoes: 'Schuhe', toner_cartridges: 'Toner', printer_cartridges: 'Druckerpatronen', bulky_waste: 'Sperrmüll', organic: 'Bioabfall',
   light_bulbs: 'Leuchtmittel', fridge_and_freezer: 'Kühlgeräte', tv_monitor: 'Bildschirme', asbestos: 'Asbest', gypsum: 'Gips', styrofoam: 'Styropor' };
 
+function zeichneContainer() {
+  const el = $('#containerListe');
+  if (!Z.ort) { el.innerHTML = '<p class="leer">Lege zuerst deinen Standort fest.</p>'; return; }
+  el.innerHTML = `<article class="karte"><div data-umgebung="${Z.containerArt || 'glas'}" data-max="5"></div></article>`;
+  fuelleUmgebung(el);
+}
+
 async function zeichneOrte() {
+  zeichneContainer();
   const ziel = $('#hoefeListe');
   $('#sperrmuellKarte').innerHTML = sperrmuellHtml(false);
   if (!Z.ort) { ziel.innerHTML = '<p class="leer">Lege zuerst deinen Standort fest.</p>'; return; }
@@ -623,18 +821,76 @@ async function melden(id, name) {
 
 function verdrahte() {
   document.addEventListener('click', (ev) => {
-    const el = ev.target.closest('[data-zu],[data-link],[data-id],[data-ort],[data-melden]');
+    const el = ev.target.closest('[data-zu],[data-link],[data-id],[data-ort],[data-melden],[data-korrigieren],[data-umgebung-laden],#zumMarkieren');
     if (!el) return;
     if (el.dataset.zu) { ev.preventDefault(); zeige(el.dataset.zu); }
     else if (el.dataset.link) { ev.preventDefault(); P.oeffne(el.dataset.link); }
     else if (el.dataset.id) {
       const e = Regeln.findeId(Z.index, el.dataset.id);
       $('#suchTreffer').hidden = true;
-      if (e) zeigeEintrag({ ...e, n: el.dataset.wort || e.n });
+      if (e) zeigeEintrag({ ...e, n: el.dataset.wort || e.n }, el.dataset.lernen);
     } else if (el.dataset.ort !== undefined) {
       const t = $('#ortTreffer')._treffer[Number(el.dataset.ort)];
       if (t) ortWaehlen(t);
-    } else if (el.dataset.melden !== undefined) melden(el.dataset.melden, el.dataset.name);
+    } else if (el.dataset.korrigieren !== undefined) {
+      korrekturStarten(el.dataset.korrigieren);
+    } else if (el.dataset.umgebungLaden !== undefined) {
+      const bereich = el.closest('[data-umgebung]');
+      if (bereich) fuelleBereich(bereich);
+    } else if (el.id === 'zumMarkieren') {
+      markierenOeffnen();
+    } else if (el.dataset.melden !== undefined) {
+      // Bei Foto-Ergebnissen: richtigen Gegenstand wählen lassen (die Erkennung lernt mit)
+      if (el.dataset.eid) korrekturStarten(el.dataset.eid);
+      else melden(el.dataset.melden, el.dataset.name);
+    }
+  });
+
+  // Korrektur abbrechen
+  $('#korrekturAbbruch').addEventListener('click', korrekturEnde);
+
+  // Sprachsuche
+  $('#mikroKnopf').hidden = !P.sprache.moeglich;
+  $('#mikroKnopf').addEventListener('click', sprachSuche);
+
+  // Teile markieren: Rahmen ziehen, antippen löscht
+  const fl = $('#markierBild');
+  fl.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const p = punktImBild(e);
+    M.zieht = { x1: p.x, y1: p.y, x2: p.x, y2: p.y };
+    fl.setPointerCapture(e.pointerId);
+  });
+  fl.addEventListener('pointermove', (e) => {
+    if (!M.zieht) return;
+    const p = punktImBild(e);
+    M.zieht.x2 = p.x; M.zieht.y2 = p.y;
+    markierenZeichnen();
+  });
+  fl.addEventListener('pointerup', (e) => {
+    if (!M.zieht) return;
+    const r = M.zieht; M.zieht = null;
+    const min = fl.width / 25;
+    if (Math.abs(r.x2 - r.x1) < min || Math.abs(r.y2 - r.y1) < min) {
+      // Antippen: Rahmen an dieser Stelle löschen
+      const p = punktImBild(e);
+      const i = M.rahmen.findIndex((q) => p.x >= Math.min(q.x1, q.x2) && p.x <= Math.max(q.x1, q.x2) && p.y >= Math.min(q.y1, q.y2) && p.y <= Math.max(q.y1, q.y2));
+      if (i >= 0) M.rahmen.splice(i, 1);
+    } else if (M.rahmen.length < 6) {
+      M.rahmen.push(r);
+    }
+    markierenZeichnen();
+  });
+  $('#markierLeeren').addEventListener('click', () => { M.rahmen = []; markierenZeichnen(); });
+  $('#markierErkennen').addEventListener('click', markierteErkennen);
+
+  // Container in den Höfen umschalten
+  $('#containerWahl').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-container]');
+    if (!b) return;
+    for (const x of $('#containerWahl').children) x.classList.toggle('an', x === b);
+    Z.containerArt = b.dataset.container;
+    zeichneContainer();
   });
 
   // Tipp auf den Ort oben: sofort den aktuellen Standort holen (anderen Ort wählen: Reiter „Region“)

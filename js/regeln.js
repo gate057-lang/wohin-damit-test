@@ -148,6 +148,7 @@
       regions_hinweis: regionsHinweis,
       regions_quelle: regionsQuelle,
       quelle,
+      verschenkbar: Boolean(eintrag.v),
     };
   }
 

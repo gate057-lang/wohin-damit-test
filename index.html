@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="app.css?v=3711a7f">
+  <link rel="stylesheet" href="app.css?v=7159bb0">
 </head>
 <body>
   <div class="app">
@@ -46,6 +46,13 @@
         <div class="suche">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
           <input id="suchFeld" type="search" placeholder="Oder suchen: Pizzakarton, Akku, Sofa …" autocomplete="off" enterkeyhint="search" aria-label="Gegenstand suchen">
+          <button class="mikro" id="mikroKnopf" type="button" aria-label="Per Sprache suchen" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+        </div>
+        <div class="korrektur" id="korrekturHinweis" hidden>
+          <span>Was ist es richtig? Such den Gegenstand – damit lernt die Erkennung dazu.</span>
+          <button class="textknopf" type="button" id="korrekturAbbruch">Abbrechen</button>
         </div>
         <ul class="treffer" id="suchTreffer" role="listbox" hidden></ul>
 
@@ -69,6 +76,20 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg> Zurück
         </button>
         <div id="ergebnisInhalt"></div>
+      </section>
+
+      <!-- Mehrere Teile: Bereiche im Foto markieren -->
+      <section class="ansicht" id="ansicht-markieren" hidden>
+        <button class="zurueck" type="button" data-zu="ergebnis">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg> Zurück
+        </button>
+        <h2 class="abschnitt">Teile markieren</h2>
+        <p class="leer">Zieh mit dem Finger einen Rahmen um jedes Teil, z. B. Becher und Deckel. Tippe auf einen Rahmen, um ihn zu löschen.</p>
+        <div class="markier-flaeche" id="markierFlaeche"><canvas id="markierBild"></canvas></div>
+        <div class="aktionen">
+          <button class="knopf" type="button" id="markierErkennen" disabled>Teile erkennen</button>
+          <button class="knopf zweit" type="button" id="markierLeeren">Alle Rahmen löschen</button>
+        </div>
       </section>
 
       <!-- Termine -->
@@ -103,6 +124,12 @@
 
       <!-- Orte -->
       <section class="ansicht" id="ansicht-orte" hidden>
+        <h2 class="abschnitt">Container in der Nähe</h2>
+        <div class="schnell" id="containerWahl">
+          <button type="button" class="wahl an" data-container="glas">Altglas</button>
+          <button type="button" class="wahl" data-container="textil">Altkleider</button>
+        </div>
+        <div id="containerListe"><p class="leer">Wird geladen …</p></div>
         <h2 class="abschnitt">Wertstoffhöfe in der Nähe</h2>
         <div id="hoefeListe"><p class="leer">Wird geladen …</p></div>
         <h2 class="abschnitt">Sperrmüll</h2>
@@ -160,12 +187,12 @@
     </nav>
   </div>
 
-  <script src="js/regeln.js?v=3711a7f"></script>
-  <script src="js/ort-logik.js?v=3711a7f"></script>
-  <script src="js/termine.js?v=3711a7f"></script>
-  <script src="js/barcode.js?v=3711a7f"></script>
-  <script src="js/plattform.js?v=3711a7f"></script>
-  <script src="js/oeffnungszeiten.js?v=3711a7f"></script>
-  <script src="app.js?v=3711a7f"></script>
+  <script src="js/regeln.js?v=7159bb0"></script>
+  <script src="js/ort-logik.js?v=7159bb0"></script>
+  <script src="js/termine.js?v=7159bb0"></script>
+  <script src="js/barcode.js?v=7159bb0"></script>
+  <script src="js/plattform.js?v=7159bb0"></script>
+  <script src="js/oeffnungszeiten.js?v=7159bb0"></script>
+  <script src="app.js?v=7159bb0"></script>
 </body>
 </html>

@@ -316,3 +316,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .status[data-zu] { cursor: pointer; }
 .service p { margin: 0; }
 .service .nummer { color: var(--akzent); text-decoration: none; line-height: 1.1; }
+
+/* Sprachsuche */
+.mikro { border: 0; background: var(--akzent-hell); color: var(--akzent); border-radius: 12px; width: 42px; height: 42px; display: grid; place-items: center; flex: none; }
+.mikro.hoert { background: var(--akzent); color: var(--akzent-tinte); animation: hoeren 1s ease-in-out infinite; }
+@keyframes hoeren { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--akzent) 25%, transparent); } }
+/* Korrigieren (Lernen) */
+.korrektur { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: var(--warn-hell); color: var(--tinte); font-size: 15px; }
+.korrektur span { flex: 1 1 200px; }
+/* Bereiche markieren */
+.markier-flaeche { position: relative; border-radius: 18px; overflow: hidden; background: #000; touch-action: none; }
+.markier-flaeche canvas { display: block; width: 100%; height: auto; }
+/* Orte-Liste (Container, Verschenken) */
+.ort-liste { list-style: none; margin: 0; padding: 0; }
+.ort-liste li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--linie); }
+.ort-liste li:last-child { border-bottom: 0; }
+.ort-liste .o-text { flex: 1; min-width: 0; display: grid; }
+.ort-liste .o-text strong { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ort-liste .o-text small { color: var(--leise); font-size: 13.5px; }
+.ort-liste .o-km { color: var(--leise); font-size: 14px; white-space: nowrap; }
+.verschenken { background: color-mix(in srgb, #c2185b 8%, var(--flaeche)); }
+.gelernt-hinweis { font-size: 13px; color: var(--akzent); }

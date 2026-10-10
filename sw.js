@@ -2,7 +2,7 @@
    Programmdateien kommen bevorzugt frisch aus dem Netz, ohne Netz aus dem
    Zwischenspeicher. Lexikon und Grundregeln sind so auch offline verfügbar.
    API-Aufrufe fasst der Service Worker nie an. */
-const VERSION = 'wohin-test-3711a7f';
+const VERSION = 'wohin-test-7159bb0';
 const HUELLE = [
   './', './index.html', './app.css', './app.js',
   './js/regeln.js', './js/ort-logik.js', './js/termine.js', './js/barcode.js', './js/plattform.js', './js/oeffnungszeiten.js',

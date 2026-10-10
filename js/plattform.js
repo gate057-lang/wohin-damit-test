@@ -37,6 +37,16 @@
       const liste = await nominatim(`/search?format=jsonv2&addressdetails=1&countrycodes=de&limit=6&q=${encodeURIComponent(q.get('q') || '')}`);
       return { treffer: liste.filter((d) => d.address).map((d) => ({ name: d.display_name, ...Ortlogik.ausAdresse(d.address, d.lat, d.lon) })).filter((o) => !o.ausserhalb) };
     },
+    async umgebung(q) {
+      const art = q.get('art'), lat = q.get('lat'), lon = q.get('lon');
+      for (const ep of ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter']) {
+        try {
+          const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(Ortlogik.umgebungAbfrage(art, lat, lon)) });
+          if (r.ok) return { orte: Ortlogik.umgebungAusOverpass(await r.json(), lat, lon, art) };
+        } catch { /* nächster Spiegel */ }
+      }
+      throw new Error('Kartendienst nicht erreichbar.');
+    },
     async hoefe(q) {
       const r = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
@@ -279,6 +289,26 @@
     return 0;
   }
 
+  /* ---------- Sprachsuche ----------
+     Nutzt die Spracherkennung des Browsers bzw. Geräts (kostenlos, keine eigene KI). */
+  const Erkenner = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const sprache = {
+    moeglich: Boolean(Erkenner),
+    hoeren() {
+      return new Promise((ok, nein) => {
+        const e = new Erkenner();
+        e.lang = 'de-DE';
+        e.interimResults = false;
+        e.maxAlternatives = 1;
+        let fertig = false;
+        e.onresult = (ev) => { fertig = true; ok(ev.results[0][0].transcript); };
+        e.onerror = (ev) => { fertig = true; nein(new Error(ev.error === 'not-allowed' ? 'Mikrofon nicht freigegeben.' : 'Ich habe nichts verstanden.')); };
+        e.onend = () => { if (!fertig) nein(new Error('Ich habe nichts verstanden.')); };
+        e.start();
+      });
+    },
+  };
+
   /** Datei speichern (Kalender-Export). */
   function speichereDatei(name, text, typ) {
     const url = URL.createObjectURL(new Blob([text], { type: typ }));
@@ -288,5 +318,5 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  window.Plattform = { erinnerung, updates, speichereDatei, nativ, API, api, standort, bildVerkleinern, speicher, oeffne, get ohneServer() { return ohneServer; } };
+  window.Plattform = { erinnerung, updates, sprache, speichereDatei, nativ, API, api, standort, bildVerkleinern, speicher, oeffne, get ohneServer() { return ohneServer; } };
 })();

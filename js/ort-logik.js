@@ -76,5 +76,67 @@
     }).filter((h) => h.lat && h.lon);
   }
 
-  return { slug, ausAdresse, grundprofil, overpassAbfrage, hoefeAusOverpass };
+  /* ---------- Umgebung: Container und „Verschenken statt wegwerfen“ ---------- */
+
+  const UMGEBUNG = {
+    // Altglas- und Altkleidercontainer (OSM: amenity=recycling + recycling_type=container)
+    glas: { radius: 4000, teile: [
+      'nwr["amenity"="recycling"]["recycling_type"="container"]["recycling:glass_bottles"="yes"]',
+      'nwr["amenity"="recycling"]["recycling_type"="container"]["recycling:glass"="yes"]',
+    ] },
+    textil: { radius: 6000, teile: [
+      'nwr["amenity"="recycling"]["recycling_type"="container"]["recycling:clothes"="yes"]',
+      'nwr["amenity"="recycling"]["recycling_type"="container"]["recycling:shoes"="yes"]',
+    ] },
+    // Sozialkaufhäuser, Second-Hand, Verschenkboxen, Bücherschränke, Repair-Cafés
+    verschenken: { radius: 15000, teile: [
+      'nwr["shop"="charity"]', 'nwr["shop"="second_hand"]', 'nwr["amenity"="give_box"]',
+      'nwr["amenity"="public_bookcase"]', 'nwr["repair"="assisted_self_service"]', 'nwr["amenity"="repair_cafe"]',
+    ] },
+  };
+
+  function umgebungAbfrage(art, lat, lon) {
+    const u = UMGEBUNG[art];
+    if (!u) throw new Error('Unbekannte Art');
+    const teile = u.teile.map((t) => `${t}(around:${u.radius},${lat},${lon});`).join('');
+    return `[out:json][timeout:20];(${teile});out center tags 60;`;
+  }
+
+  function artVon(t) {
+    if (t.amenity === 'give_box') return 'Verschenkbox';
+    if (t.amenity === 'public_bookcase') return 'Bücherschrank';
+    if (t.amenity === 'repair_cafe' || t.repair === 'assisted_self_service') return 'Repair-Café';
+    if (t.shop === 'charity') return 'Sozialkaufhaus';
+    if (t.shop === 'second_hand') return 'Second-Hand';
+    if (t['recycling:clothes'] === 'yes' || t['recycling:shoes'] === 'yes') return 'Altkleidercontainer';
+    if (t['recycling:glass_bottles'] === 'yes' || t['recycling:glass'] === 'yes') return 'Altglascontainer';
+    return 'Ort';
+  }
+
+  /** Overpass-Antwort → Orte (ohne Koordinatenlose), sortiert nach Entfernung vom Punkt. */
+  function umgebungAusOverpass(d, lat, lon, gesucht) {
+    const r = Math.PI / 180;
+    const km = (a, b) => 12742 * Math.asin(Math.sqrt(Math.sin((b.lat - a.lat) * r / 2) ** 2 +
+      Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lon - a.lon) * r / 2) ** 2));
+    const gesehen = new Set();
+    return (d.elements || []).map((e) => {
+      const t = e.tags || {};
+      const p = { lat: e.lat || (e.center && e.center.lat), lon: e.lon || (e.center && e.center.lon) };
+      const art = gesucht === 'glas' ? 'Altglascontainer' : gesucht === 'textil' ? 'Altkleidercontainer' : artVon(t);
+      return {
+        art,
+        name: t.name || t.operator || art,
+        adresse: [t['addr:street'] && `${t['addr:street']} ${t['addr:housenumber'] || ''}`.trim(), t['addr:city']].filter(Boolean).join(', '),
+        oeffnungszeiten_osm: t.opening_hours || null,
+        web: t.website || t['contact:website'] || null,
+        lat: p.lat, lon: p.lon,
+        km: p.lat ? km({ lat: Number(lat), lon: Number(lon) }, p) : null,
+      };
+    }).filter((o) => o.lat && o.lon)
+      .filter((o) => { const k = o.lat.toFixed(4) + o.lon.toFixed(4); if (gesehen.has(k)) return false; gesehen.add(k); return true; })
+      .sort((a, b) => a.km - b.km)
+      .slice(0, 12);
+  }
+
+  return { slug, ausAdresse, grundprofil, overpassAbfrage, hoefeAusOverpass, umgebungAbfrage, umgebungAusOverpass, UMGEBUNG_ARTEN: Object.keys(UMGEBUNG) };
 });
