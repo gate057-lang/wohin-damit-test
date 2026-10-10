@@ -337,3 +337,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ort-liste .o-km { color: var(--leise); font-size: 14px; white-space: nowrap; }
 .verschenken { background: color-mix(in srgb, #c2185b 8%, var(--flaeche)); }
 .gelernt-hinweis { font-size: 13px; color: var(--akzent); }
+.versionszeile { margin-top: 6px; font-variant-numeric: tabular-nums; }

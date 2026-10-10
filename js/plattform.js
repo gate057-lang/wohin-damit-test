@@ -276,7 +276,8 @@
       if (U && j.web && j.web.version > jetzt && Number(info.build) >= Number(j.web.nativ_min || 0)) {
         try {
           const vorhanden = (await U.list()).bundles.find((b) => b.version === j.web.version && b.status === 'success');
-          const b = vorhanden || await U.download({ url: j.web.url, version: j.web.version });
+          // Prüfsumme (SHA-256 des Pakets) ist Pflicht, sonst lehnt der Updater den Download ab
+          const b = vorhanden || await U.download({ url: j.web.url, version: j.web.version, checksum: j.web.checksum });
           await U.next({ id: b.id });
           melde({ art: 'web', text: 'Ein Update wurde geladen und ist beim nächsten Start aktiv.', knopf: 'Jetzt neu starten', id: b.id });
         } catch (f) { console.warn('Update fehlgeschlagen', f); }

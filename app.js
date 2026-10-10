@@ -27,9 +27,9 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon, ratgeber] = await Promise.all([
-    fetch('daten/fraktionen.json?v=83368c4').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=83368c4').then((r) => r.json()),
-    fetch('daten/ratgeber.json?v=83368c4').then((r) => r.json()).catch(() => null),
+    fetch('daten/fraktionen.json?v=cd753c5').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=cd753c5').then((r) => r.json()),
+    fetch('daten/ratgeber.json?v=cd753c5').then((r) => r.json()).catch(() => null),
   ]);
   Z.stamm = stamm;
   Z.ratgeber = ratgeber;
@@ -758,8 +758,33 @@ function zeichneRatgeber() {
   }
 }
 
+/** „Version 0.1.2 · veröffentlicht am 10.10.2026, 23:26 Uhr“ – in der App aus dem installierten Paket. */
+async function zeigeVersion() {
+  const el = $('#versionsZeile');
+  if (!el || el.textContent) return;
+  const stand = window.APP_STAND || {};
+  let version = stand.version || '';
+  let datum = stand.datum ? new Date(stand.datum) : null;
+  if (P.nativ) {
+    try {
+      const A = window.Capacitor.Plugins.App;
+      if (A) version = (await A.getInfo()).version || version;
+    } catch { /* Versionsdatei genügt */ }
+    // Oberflächen-Updates tragen ihr Datum in WEB_VERSION (JJJJMMTTHHMM)
+    const w = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/.exec(window.WEB_VERSION || '');
+    if (w) datum = new Date(`${w[1]}-${w[2]}-${w[3]}T${w[4]}:${w[5]}:00`);
+  }
+  if (!version) return;
+  const wann = datum && !isNaN(datum)
+    ? ' · veröffentlicht am ' + datum.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }) +
+      ', ' + datum.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr'
+    : '';
+  el.textContent = `Version ${version}${wann}`;
+}
+
 function zeichneRegion() {
   zeichneRatgeber();
+  zeigeVersion();
   const o = Z.ort, p = Z.profil;
   $('#ortZusammenfassung').textContent = o ? '· ' + (o.gemeinde || o.kreis) : '';
   const ziel = $('#regionInfo');
