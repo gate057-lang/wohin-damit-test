@@ -90,6 +90,10 @@
       return ersatz(pfad);
     }
     const daten = await antwort.json().catch(() => ({}));
+    // Kartendienst über den Server überlastet → direkt vom Gerät bei OpenStreetMap fragen
+    if (antwort.status === 503 && /^\/(umgebung|hoefe)\?/.test(pfad)) {
+      try { return await ersatz(pfad); } catch { /* unten Fehlermeldung des Servers */ }
+    }
     if (!antwort.ok) {
       const f = new Error(daten.fehler || 'Anfrage fehlgeschlagen (' + antwort.status + ')');
       f.status = antwort.status;

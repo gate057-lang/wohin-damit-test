@@ -27,9 +27,9 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon, ratgeber] = await Promise.all([
-    fetch('daten/fraktionen.json?v=7159bb0').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=7159bb0').then((r) => r.json()),
-    fetch('daten/ratgeber.json?v=7159bb0').then((r) => r.json()).catch(() => null),
+    fetch('daten/fraktionen.json?v=83368c4').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=83368c4').then((r) => r.json()),
+    fetch('daten/ratgeber.json?v=83368c4').then((r) => r.json()).catch(() => null),
   ]);
   Z.stamm = stamm;
   Z.ratgeber = ratgeber;
@@ -306,7 +306,7 @@ async function fuelleBereich(el) {
     el.innerHTML = orte.length ? ortListeHtml(orte)
       : `<p class="leer">${art === 'verschenken' ? 'In der Nähe ist nichts eingetragen. Tipp: Nachbarschafts-Gruppen oder Kleinanzeigen („Zu verschenken“).' : 'In der Nähe ist kein Container eingetragen – frag am Wertstoffhof.'}</p>`;
   } catch (f) {
-    el.innerHTML = `<p class="leer">${esc(f.message)}</p>`;
+    el.innerHTML = `<p class="leer">${esc(f.message)}</p><button class="knopf zweit klein" type="button" data-umgebung-laden>Nochmal versuchen</button>`;
   }
 }
 

@@ -89,17 +89,22 @@
       'nwr["amenity"="recycling"]["recycling_type"="container"]["recycling:shoes"="yes"]',
     ] },
     // Sozialkaufhäuser, Second-Hand, Verschenkboxen, Bücherschränke, Repair-Cafés
-    verschenken: { radius: 15000, teile: [
-      'nwr["shop"="charity"]', 'nwr["shop"="second_hand"]', 'nwr["amenity"="give_box"]',
-      'nwr["amenity"="public_bookcase"]', 'nwr["repair"="assisted_self_service"]', 'nwr["amenity"="repair_cafe"]',
+    verschenken: { radius: 12000, teile: [
+      'nwr["shop"~"^(charity|second_hand)$"]',
+      'nwr["amenity"~"^(give_box|public_bookcase|repair_cafe)$"]',
+      'nwr["repair"="assisted_self_service"]',
     ] },
   };
 
+  /** Rechteckiger Suchbereich statt Kreis – für Overpass deutlich schneller. */
   function umgebungAbfrage(art, lat, lon) {
     const u = UMGEBUNG[art];
     if (!u) throw new Error('Unbekannte Art');
-    const teile = u.teile.map((t) => `${t}(around:${u.radius},${lat},${lon});`).join('');
-    return `[out:json][timeout:20];(${teile});out center tags 60;`;
+    const la = Number(lat), lo = Number(lon);
+    const dLat = u.radius / 111320, dLon = u.radius / (111320 * Math.cos(la * Math.PI / 180));
+    const bbox = [la - dLat, lo - dLon, la + dLat, lo + dLon].map((x) => x.toFixed(5)).join(',');
+    const teile = u.teile.map((t) => `${t}(${bbox});`).join('');
+    return `[out:json][timeout:25];(${teile});out center tags 80;`;
   }
 
   function artVon(t) {
