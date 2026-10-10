@@ -276,3 +276,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .teile .ziel strong { color: var(--tinte); }
 .produkt-kopf + .ergebnis-koerper .teile:first-child, .region-hinweis + .teile { margin-top: 0; }
 .produkt-kopf + .ergebnis-koerper .teile:first-child { border-top: 0; }
+
+.update-hinweis { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 0; padding: 12px 14px;
+  background: var(--akzent-hell); border: 1px solid color-mix(in srgb, var(--akzent) 30%, var(--linie)); border-radius: 16px; font-size: 15px; }
+.update-hinweis span { flex: 1 1 180px; }

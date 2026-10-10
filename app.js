@@ -27,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=2232186').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=2232186').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=eb0aed0').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=eb0aed0').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -209,7 +209,11 @@ async function fotoAuswerten(datei) {
         <p class="leer">${esc(d.unklar_grund || 'Versuche es mit mehr Licht und dem Gegenstand formatfüllend im Bild.')}</p>
         <div class="aktionen"><label class="knopf" for="fotoEingabe">Noch ein Foto</label></div></article>`;
     } else {
-      $('#ergebnisInhalt').innerHTML = d.gegenstaende.map((g) => ergebnisKarte(g.ergebnis, g)).join('');
+      const alt = (d.alternativen || []).length
+        ? `<article class="karte"><p><strong>Nicht richtig erkannt?</strong> Vielleicht ist es:</p>
+            <div class="schnell">${d.alternativen.map((a) => `<button type="button" data-id="${esc(a.lexikon_id)}" data-wort="${esc(a.bezeichnung)}">${esc(a.bezeichnung)}</button>`).join('')}</div>
+            <p class="leer">Oder such den Gegenstand oben über die Suche.</p></article>` : '';
+      $('#ergebnisInhalt').innerHTML = d.gegenstaende.map((g) => ergebnisKarte(g.ergebnis, { ...g, sicherheit: d.alternativen && d.alternativen.length ? 1 : g.sicherheit })).join('') + alt;
     }
     zeige('ergebnis');
   } catch (f) {
@@ -671,13 +675,35 @@ function verdrahte() {
   });
 }
 
+/* ------------------------------ Updates (native App) ------------------------------ */
+
+let letztePruefung = 0;
+function updatesPruefen() {
+  if (!P.nativ || Date.now() - letztePruefung < 6 * 3600e3) return;
+  letztePruefung = Date.now();
+  P.updates.pruefen();
+}
+window.addEventListener('wohin-update', (e) => {
+  const d = e.detail;
+  const el = $('#updateHinweis');
+  el.hidden = false;
+  el.innerHTML = `<span>${esc(d.text)}</span>
+    <button class="knopf klein" type="button" id="updateKnopf">${esc(d.knopf)}</button>
+    ${d.pflicht ? '' : '<button class="textknopf" type="button" id="updateSpaeter">Später</button>'}`;
+  $('#updateKnopf').onclick = () => (d.art === 'web' ? P.updates.jetztAnwenden(d.id) : P.oeffne(d.url));
+  const spaeter = $('#updateSpaeter');
+  if (spaeter) spaeter.onclick = () => { el.hidden = true; };
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) updatesPruefen(); });
+
 async function start() {
   verdrahte();
   await ladeDaten();
   zeichneKopf();
   zeichneAbholung();
   if (location.hash === '#termine') zeige('termine');
-  P.api('/health').then((h) => { Z.fotoAktiv = h.foto; }).catch(() => { Z.fotoAktiv = false; });
+  P.api('/health').then((h) => { Z.fotoAktiv = h.foto_ki === 'claude'; }).catch(() => { Z.fotoAktiv = false; });
+  updatesPruefen();
   if (Z.ort) {
     beobachteRecherche();
     // Profil im Hintergrund auffrischen

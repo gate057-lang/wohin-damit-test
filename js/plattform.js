@@ -225,6 +225,60 @@
     },
   };
 
+  /* ---------- Updates der nativen App ----------
+     1. Oberfläche (HTML/JS/Daten): lädt sich still im Hintergrund und gilt ab dem
+        nächsten Start (Capgo-Updater, nur mit unserem Server). Für iOS erlaubt,
+        solange sich der Zweck der App nicht ändert (App-Store-Regeln zu nachgeladenem Web-Code).
+     2. Neue App-Version (nativer Teil): Android → Hinweis mit Download der APK,
+        iOS → Hinweis auf den App Store. Meldung per Ereignis „wohin-update“. */
+  const updates = {
+    async pruefen() {
+      if (!nativ) return;
+      const U = cap.Plugins && cap.Plugins.CapacitorUpdater;
+      const A = cap.Plugins && cap.Plugins.App;
+      try { if (U) await U.notifyAppReady(); } catch { /* kein Updater */ }
+      let j;
+      try {
+        const r = await fetch(SERVER + '/updates/updates.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) return;
+        j = await r.json();
+      } catch { return; }
+      const info = A ? await A.getInfo() : { build: '0', version: '0' };
+      const plattform = cap.getPlatform();
+      const melde = (detail) => window.dispatchEvent(new CustomEvent('wohin-update', { detail }));
+
+      // Neue App-Version?
+      if (plattform === 'android' && j.android && Number(j.android.versionCode) > Number(info.build)) {
+        melde({ art: 'nativ', text: `Neue App-Version ${j.android.versionName} verfügbar.`, knopf: 'Aktualisieren', url: j.android.apk, pflicht: Boolean(j.android.pflicht) });
+        if (j.web && Number(j.web.nativ_min || 0) > Number(info.build)) return; // Oberfläche braucht die neue App
+      }
+      if (plattform === 'ios' && j.ios && j.ios.store && vergleiche(j.ios.version, info.version) > 0) {
+        melde({ art: 'nativ', text: `Neue Version ${j.ios.version} im App Store.`, knopf: 'Im App Store öffnen', url: j.ios.store });
+        if (j.web && Number(j.web.nativ_min || 0) > Number(info.build)) return;
+      }
+
+      // Neue Oberfläche still im Hintergrund laden
+      const jetzt = window.WEB_VERSION || '0';
+      if (U && j.web && j.web.version > jetzt && Number(info.build) >= Number(j.web.nativ_min || 0)) {
+        try {
+          const vorhanden = (await U.list()).bundles.find((b) => b.version === j.web.version && b.status === 'success');
+          const b = vorhanden || await U.download({ url: j.web.url, version: j.web.version });
+          await U.next({ id: b.id });
+          melde({ art: 'web', text: 'Ein Update wurde geladen und ist beim nächsten Start aktiv.', knopf: 'Jetzt neu starten', id: b.id });
+        } catch (f) { console.warn('Update fehlgeschlagen', f); }
+      }
+    },
+    async jetztAnwenden(id) {
+      const U = cap.Plugins && cap.Plugins.CapacitorUpdater;
+      if (U && id) await U.set({ id });
+    },
+  };
+  function vergleiche(a, b) {
+    const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
+    for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0);
+    return 0;
+  }
+
   /** Datei speichern (Kalender-Export). */
   function speichereDatei(name, text, typ) {
     const url = URL.createObjectURL(new Blob([text], { type: typ }));
@@ -234,5 +288,5 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  window.Plattform = { erinnerung, speichereDatei, nativ, API, api, standort, bildVerkleinern, speicher, oeffne, get ohneServer() { return ohneServer; } };
+  window.Plattform = { erinnerung, updates, speichereDatei, nativ, API, api, standort, bildVerkleinern, speicher, oeffne, get ohneServer() { return ohneServer; } };
 })();

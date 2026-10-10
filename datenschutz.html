@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Datenschutz – Wohin damit?</title>
-<link rel="stylesheet" href="rechtstexte.css?v=2232186">
+<link rel="stylesheet" href="rechtstexte.css?v=eb0aed0">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -29,7 +29,9 @@ Kontakt: <a href="kontakt.html">Kontaktformular</a></p></div>
 <p>Wenn du den Standort freigibst, sendet die App deine Koordinaten an unseren Server. Er ermittelt daraus Gemeinde und Landkreis über den Dienst Nominatim der OpenStreetMap Foundation (Vereinigtes Königreich, Angemessenheitsbeschluss der EU-Kommission) und sucht Wertstoffhöfe in der Umgebung über die Overpass-API (OpenStreetMap). Gespeichert wird bei uns nur das Ergebnis zu einer auf etwa 100 m gerundeten Koordinate (Gemeinde, Landkreis), ohne Bezug zu deiner Person und ohne Straße. Den gewählten Ort und das Regionsprofil speichert die App im Speicher deines Geräts (Local Storage). Du kannst den Ort jederzeit ändern oder statt des Standorts einen Ort eingeben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der von dir gewünschten Funktion).</p>
 
 <h2>5. Foto-Erkennung</h2>
-<p>Machst du ein Foto, wird es verkleinert an unseren Server übertragen und von dort zur Bilderkennung an die Anthropic PBC (548 Market Street, San Francisco, CA 94104, USA) weitergeleitet. Anthropic erkennt den Gegenstand und gibt das Ergebnis zurück. Wir speichern das Foto nicht. Anthropic verarbeitet die Daten als Auftragsverarbeiter und nutzt sie nicht zum Training seiner Modelle. Die Übermittlung in die USA erfolgt auf Grundlage von EU-Standardvertragsklauseln. Bitte fotografiere keine Personen, Ausweise oder andere persönliche Unterlagen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
+<p>Machst du ein Foto, wird es verkleinert an unseren Server übertragen und dort von einem Bilderkennungsmodell ausgewertet, das auf unserem eigenen Server läuft. Das Foto wird dabei an niemanden weitergegeben und nicht gespeichert; nach der Auswertung wird es sofort verworfen.</p>
+<p>Wenn wir künftig für eine genauere Erkennung den Dienst der Anthropic PBC (548 Market Street, San Francisco, CA 94104, USA) einsetzen, wird das Foto von unserem Server dorthin weitergeleitet. Anthropic verarbeitet die Daten dann als Auftragsverarbeiter und nutzt sie nicht zum Training seiner Modelle; die Übermittlung in die USA erfolgt auf Grundlage von EU-Standardvertragsklauseln. Wir aktualisieren diese Erklärung, bevor das geschieht.</p>
+<p>Bitte fotografiere keine Personen, Ausweise oder andere persönliche Unterlagen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
 
 <h2>6. Automatische Ermittlung der Regionsregeln</h2>
 <p>Für jede Region ermittelt der Server einmalig die öffentlichen Angaben des zuständigen Entsorgers (Tonnen, Wertstoffhöfe, Sperrmüll, Abfuhrkalender). Dabei werden keine personenbezogenen Daten von dir verwendet – nur der Name des Landkreises bzw. der Stadt.</p>
@@ -38,7 +40,7 @@ Kontakt: <a href="kontakt.html">Kontaktformular</a></p></div>
 <p>Scannst du einen Strichcode, liest dein Gerät die Nummer selbst aus. Die App fragt dann mit dieser Produktnummer direkt bei Open Food Facts (Open Food Facts, Frankreich) nach den Verpackungsangaben. Dabei sieht Open Food Facts deine IP-Adresse und die Produktnummer, aber keine weiteren Daten. Das Foto des Strichcodes verlässt dein Gerät nicht.</p>
 
 <h2>6b. Abfuhrtermine und Erinnerungen</h2>
-<p>Fügst du einen Kalender-Link ein, ruft unser Server den Kalender dort ab und gibt die Termine an die App zurück; gespeichert werden sie nur auf deinem Gerät. Eine ICS-Datei wird direkt auf deinem Gerät ausgelesen. Fotografierst du einen gedruckten Abfuhrkalender, wird das Foto wie in Abschnitt 5 beschrieben zur Texterkennung an Anthropic übertragen und nicht gespeichert.</p>
+<p>Fügst du einen Kalender-Link ein, ruft unser Server den Kalender dort ab und gibt die Termine an die App zurück; gespeichert werden sie nur auf deinem Gerät. Eine ICS-Datei wird direkt auf deinem Gerät ausgelesen. Das Auslesen eines fotografierten Abfuhrkalenders steht erst zur Verfügung, wenn wir den in Abschnitt 5 genannten Dienst von Anthropic einsetzen; das Foto würde dann dorthin zur Texterkennung übertragen und nicht gespeichert.</p>
 <p>Schaltest du die Erinnerung am Vorabend ein, gilt: In der App für iPhone und Android plant dein Gerät die Benachrichtigungen selbst, ohne unseren Server. Im Browser speichern wir die technische Push-Adresse deines Browsers, deine Abfuhrtermine (Datum und Tonnenart), die gewählten Tonnen und die Uhrzeit, um dir die Nachricht zu schicken. Zugestellt wird sie über den Push-Dienst deines Browser-Herstellers (z. B. Google, Apple oder Mozilla). Ein Bezug zu deiner Person besteht nicht. Schaltest du die Erinnerung aus, löschen wir diese Angaben sofort; nicht genutzte Einträge nach 13 Monaten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
 
 <h2>7. Meldungen und Kontaktformular</h2>
