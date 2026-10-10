@@ -1,0 +1,42 @@
+{
+  "_info": "Bundesweite Grundregel (Kreislaufwirtschaftsgesetz, Verpackungsgesetz, ElektroG, BattG). Regionale Abweichungen kommen aus dem Regionsprofil.",
+  "fraktionen": {
+    "rest":        { "name": "Restmüll",              "behaelter": "Restmülltonne",                 "farbe": "#3f4448", "symbol": "tonne" },
+    "bio":         { "name": "Bioabfall",             "behaelter": "Biotonne",                      "farbe": "#7a4e2d", "symbol": "tonne" },
+    "papier":      { "name": "Papier & Pappe",        "behaelter": "Papiertonne",                   "farbe": "#1f5fbf", "symbol": "tonne" },
+    "verpackung":  { "name": "Leichtverpackungen",    "behaelter": "Gelber Sack / Gelbe Tonne",     "farbe": "#e6b800", "symbol": "sack" },
+    "glas":        { "name": "Altglas",               "behaelter": "Altglascontainer",              "farbe": "#2e8b57", "symbol": "container" },
+    "pfand":       { "name": "Pfand",                 "behaelter": "Pfandautomat im Handel",        "farbe": "#0f8b8d", "symbol": "handel" },
+    "elektro":     { "name": "Elektroaltgerät",       "behaelter": "Wertstoffhof oder Rückgabe im Handel", "farbe": "#6b4fbf", "symbol": "hof" },
+    "batterie":    { "name": "Batterien & Akkus",     "behaelter": "Sammelbox im Handel oder Wertstoffhof", "farbe": "#d9534f", "symbol": "handel" },
+    "schadstoff":  { "name": "Schadstoff",            "behaelter": "Schadstoffmobil oder Wertstoffhof", "farbe": "#b03a2e", "symbol": "hof" },
+    "sperrmuell":  { "name": "Sperrmüll",             "behaelter": "Sperrmüll-Abholung oder Wertstoffhof", "farbe": "#8a6d3b", "symbol": "sperrmuell" },
+    "gruengut":    { "name": "Grüngut",               "behaelter": "Grüngutsammelplatz",            "farbe": "#5a9e3a", "symbol": "hof" },
+    "holz":        { "name": "Altholz",               "behaelter": "Wertstoffhof (Altholz)",        "farbe": "#a0703c", "symbol": "hof" },
+    "metall":      { "name": "Metallschrott",         "behaelter": "Wertstoffhof (Schrott)",        "farbe": "#7d8790", "symbol": "hof" },
+    "bauschutt":   { "name": "Bauschutt",             "behaelter": "Wertstoffhof oder Bauschuttdeponie", "farbe": "#9c8f80", "symbol": "hof" },
+    "textil":      { "name": "Alttextilien",          "behaelter": "Altkleidercontainer",           "farbe": "#c2185b", "symbol": "container" },
+    "wertstoffhof":{ "name": "Wertstoffhof",          "behaelter": "Wertstoffhof",                  "farbe": "#455a64", "symbol": "hof" },
+    "handel":      { "name": "Rückgabe beim Händler", "behaelter": "Händler bzw. Verkaufsstelle",   "farbe": "#00796b", "symbol": "handel" }
+  },
+  "systeme": {
+    "verpackung": {
+      "sack":           { "behaelter": "Gelber Sack" },
+      "tonne":          { "behaelter": "Gelbe Tonne" },
+      "wertstofftonne": { "behaelter": "Wertstofftonne", "nimmt_stoffgleiche": true },
+      "bringsystem":    { "behaelter": "Wertstoffhof / Wertstoffinsel", "symbol": "hof" },
+      "unbekannt":      { "behaelter": "Gelber Sack / Gelbe Tonne" }
+    },
+    "bio": {
+      "tonne":       { "behaelter": "Biotonne" },
+      "bringsystem": { "behaelter": "Bioabfall-Sammelstelle", "symbol": "hof" },
+      "keine":       { "behaelter": "Restmüll oder eigener Kompost", "fraktion_ersatz": "rest" },
+      "unbekannt":   { "behaelter": "Biotonne" }
+    },
+    "papier": {
+      "tonne":       { "behaelter": "Papiertonne" },
+      "bringsystem": { "behaelter": "Papiercontainer / Wertstoffhof", "symbol": "container" },
+      "unbekannt":   { "behaelter": "Papiertonne" }
+    }
+  }
+}

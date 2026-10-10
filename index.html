@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Wohin damit?</title>
+  <meta name="description" content="Foto machen, Antwort bekommen: In welche Tonne gehört das? Mit den Regeln deines Entsorgers, Wertstoffhöfen und Sperrmüll-Anmeldung.">
+  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="kopf">
+      <button class="ort-chip" id="ortChip" type="button" aria-label="Standort ändern">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span class="ort-text"><strong id="ortName">Standort wird bestimmt …</strong><small id="ortKreis"></small></span>
+      </button>
+      <span class="status" id="regionStatus" hidden></span>
+    </header>
+
+    <main id="inhalt">
+      <!-- Start -->
+      <section class="ansicht" id="ansicht-start">
+        <h1 class="titel">Wohin damit?</h1>
+        <p class="untertitel">Halte die Kamera auf den Gegenstand – ich sage dir, wohin er gehört.</p>
+
+        <label class="kamera" for="fotoEingabe">
+          <span class="kamera-ring"></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.4A1.5 1.5 0 0 1 9.9 5h4.2a1.5 1.5 0 0 1 1.3.6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.6"/></svg>
+          <span class="kamera-text">Foto machen</span>
+        </label>
+        <input type="file" id="fotoEingabe" accept="image/*" capture="environment" hidden>
+
+        <div class="suche">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          <input id="suchFeld" type="search" placeholder="Oder suchen: Pizzakarton, Akku, Sofa …" autocomplete="off" enterkeyhint="search" aria-label="Gegenstand suchen">
+        </div>
+        <ul class="treffer" id="suchTreffer" role="listbox" hidden></ul>
+
+        <div class="schnell" id="schnellwahl" aria-label="Häufige Fragen"></div>
+
+        <article class="karte hinweis-karte" id="regionKarte" hidden></article>
+      </section>
+
+      <!-- Ergebnis -->
+      <section class="ansicht" id="ansicht-ergebnis" hidden>
+        <button class="zurueck" type="button" data-zu="start">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg> Zurück
+        </button>
+        <div id="ergebnisInhalt"></div>
+      </section>
+
+      <!-- Orte -->
+      <section class="ansicht" id="ansicht-orte" hidden>
+        <h2 class="abschnitt">Wertstoffhöfe in der Nähe</h2>
+        <div id="hoefeListe"><p class="leer">Wird geladen …</p></div>
+        <h2 class="abschnitt">Sperrmüll</h2>
+        <div id="sperrmuellKarte"></div>
+      </section>
+
+      <!-- Region -->
+      <section class="ansicht" id="ansicht-region" hidden>
+        <h2 class="abschnitt">Deine Region</h2>
+        <div id="regionInfo"></div>
+        <h2 class="abschnitt">Anderen Ort wählen</h2>
+        <div class="suche">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          <input id="ortSuche" type="search" placeholder="Ort oder PLZ, z. B. Regenstauf" autocomplete="off" enterkeyhint="search" aria-label="Ort suchen">
+        </div>
+        <ul class="treffer" id="ortTreffer" hidden></ul>
+        <button class="knopf zweit" type="button" id="standortNeu">Aktuellen Standort verwenden</button>
+        <p class="kleingedruckt">Automatisch ermittelte Angaben ohne Gewähr – maßgeblich ist die Abfallsatzung deines Entsorgers.
+          <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+      </section>
+    </main>
+
+    <div class="laden" id="laden" hidden>
+      <div class="laden-box">
+        <div class="kreisel" aria-hidden="true"></div>
+        <p id="ladenText">Ich schaue mir das an …</p>
+      </div>
+    </div>
+
+    <nav class="leiste" aria-label="Hauptnavigation">
+      <button type="button" data-zu="start" class="aktiv">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.4A1.5 1.5 0 0 1 9.9 5h4.2a1.5 1.5 0 0 1 1.3.6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.6"/></svg>
+        <span>Wohin?</span>
+      </button>
+      <button type="button" data-zu="orte">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>
+        <span>Höfe</span>
+      </button>
+      <button type="button" data-zu="region">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span>Region</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="js/regeln.js"></script>
+  <script src="js/ort-logik.js"></script>
+  <script src="js/plattform.js"></script>
+  <script src="js/oeffnungszeiten.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kontakt – Wohin damit?</title>
+<link rel="stylesheet" href="rechtstexte.css">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="huelle">
+<header><img src="icons/icon-192.png" alt=""><b>Wohin damit?</b><a href="./">← Zur App</a></header>
+
+<h1>Kontakt</h1>
+<p class="stand">Fragen, Hinweise, Lob oder Kritik – schreib uns.</p>
+
+<form id="formular">
+  <label for="name">Name (freiwillig)</label>
+  <input id="name" name="name" maxlength="100" autocomplete="name">
+  <label for="antwort">E-Mail für die Antwort</label>
+  <input id="antwort" name="antwort" type="email" maxlength="200" autocomplete="email" required>
+  <label for="text">Nachricht</label>
+  <textarea id="text" name="text" maxlength="4000" required></textarea>
+  <input class="falle" name="webseite" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <button type="submit">Absenden</button>
+  <p class="stand">Hinweise zur Verarbeitung findest du in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+</form>
+<p class="meldung" id="meldung" hidden></p>
+
+<footer><a href="./">App</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></footer>
+</div>
+<script>
+  document.getElementById('formular').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, m = document.getElementById('meldung');
+    const daten = Object.fromEntries(new FormData(f));
+    const nativ = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || /\.github\.io$/.test(location.hostname);
+    try {
+      const r = await fetch((nativ ? 'https://wohin.velasync.de' : '') + '/api/kontakt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.fehler || 'Senden fehlgeschlagen.');
+      f.hidden = true;
+      m.textContent = 'Danke! Deine Nachricht ist angekommen.';
+    } catch (err) {
+      m.textContent = err instanceof TypeError
+        ? 'Das Kontaktformular ist erst aktiv, wenn der Server online ist.'
+        : err.message;
+    }
+    m.hidden = false;
+  });
+</script>
+</body>
+</html>
