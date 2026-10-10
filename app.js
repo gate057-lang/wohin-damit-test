@@ -27,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=eb0aed0').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=eb0aed0').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=db25fa2').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=db25fa2').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -350,8 +350,7 @@ function hoefeHtml(offiziell, osm) {
       ${annahme.length ? `<div class="marken">${annahme.map((a) => `<span class="marke">${esc(a)}</span>`).join('')}</div>` : ''}
       <div class="zeile">
         <button class="knopf klein" type="button" data-link="${esc(routeUrl(h))}">Route</button>
-        ${h.km != null ? `<span class="entfernung">${h.km.toFixed(1).replace('.', ',')} km</span>` : ''}
-        <span class="entfernung">${h.offiziell ? 'Quelle: Entsorger' : 'Quelle: OpenStreetMap'}</span>
+        ${h.km != null ? `<span class="entfernung">Entfernung: ${h.km.toFixed(1).replace('.', ',')} km</span>` : ''}
       </div>
     </article>`;
   }).join('');
