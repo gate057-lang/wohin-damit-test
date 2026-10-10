@@ -26,11 +26,13 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 /* ------------------------------ Grundlagen ------------------------------ */
 
 async function ladeDaten() {
-  const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=87785df').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=87785df').then((r) => r.json()),
+  const [stamm, lexikon, ratgeber] = await Promise.all([
+    fetch('daten/fraktionen.json?v=f8f2090').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=f8f2090').then((r) => r.json()),
+    fetch('daten/ratgeber.json?v=f8f2090').then((r) => r.json()).catch(() => null),
   ]);
   Z.stamm = stamm;
+  Z.ratgeber = ratgeber;
   Z.index = Regeln.baueIndex(lexikon);
 }
 
@@ -529,8 +531,39 @@ async function erinnerungEinrichten(still) {
 
 /* ------------------------------ Region ------------------------------ */
 
+function zeichneRatgeber() {
+  const r = Z.ratgeber;
+  if (!r || $('#ratgeber').childElementCount) return;
+  const liste = (titel, punkte, art) => punkte && punkte.length
+    ? `<h4>${titel}</h4><ul class="${art}">${punkte.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  $('#ratgeber').innerHTML = r.abschnitte.map((s) => {
+    const f = Z.stamm.fraktionen[s.fraktion] || Z.stamm.fraktionen.rest;
+    return `<details class="karte regel">
+      <summary><span class="r-symbol">${tonneSvg(f.symbol, f.farbe)}</span>
+        <span class="r-titel"><strong>${esc(s.titel)}</strong><small>${esc(s.kurz)}</small></span></summary>
+      <div class="r-inhalt">
+        ${liste('Gehört hinein', s.ja, 'ja')}
+        ${liste('Gehört nicht hinein', s.nein, 'nein')}
+        ${s.tipp ? `<p class="r-tipp">${esc(s.tipp)}</p>` : ''}
+      </div></details>`;
+  }).join('');
+  const sv = r.service;
+  if (sv) {
+    $('#serviceKarte').innerHTML = `<article class="karte service">
+      <p><strong>${esc(sv.titel)}</strong></p>
+      <p class="leer">${esc(sv.text)}</p>
+      <a class="nummer" href="tel:${esc(sv.nummer)}">${esc(sv.nummer)}</a>
+      <p class="leer">${esc(sv.zeiten)}</p>
+      <div class="aktionen"><a class="knopf" href="tel:${esc(sv.nummer)}">Jetzt anrufen</a>
+        <button class="knopf zweit" type="button" data-link="${esc(sv.quelle)}">115.de</button></div>
+    </article>`;
+  }
+}
+
 function zeichneRegion() {
+  zeichneRatgeber();
   const o = Z.ort, p = Z.profil;
+  $('#ortZusammenfassung').textContent = o ? '· ' + (o.gemeinde || o.kreis) : '';
   const ziel = $('#regionInfo');
   if (!o || !p) { ziel.innerHTML = '<article class="karte"><p class="leer">Noch kein Ort festgelegt.</p></article>'; return; }
   const sys = p.system || {};

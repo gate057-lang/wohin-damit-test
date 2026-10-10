@@ -1,0 +1,110 @@
+{
+  "_info": "Einfach erklärte bundesweite Grundregeln. Regional kann es Abweichungen geben – maßgeblich ist der örtliche Entsorger.",
+  "abschnitte": [
+    {
+      "id": "rest", "titel": "Restmüll", "fraktion": "rest",
+      "kurz": "Alles, was sich nicht verwerten lässt.",
+      "ja": ["Hygieneartikel, Windeln, Taschentücher", "Staubsaugerbeutel, Kehricht, Katzenstreu", "Zigarettenkippen, kalte Asche", "Porzellan, Trinkgläser, Spiegel", "Kassenbons, Fotos, Backpapier"],
+      "nein": ["Batterien und Akkus", "Elektrogeräte", "Farben, Chemikalien"],
+      "tipp": "Je weniger im Restmüll landet, desto günstiger wird es oft – in vielen Orten richtet sich die Gebühr nach der Tonnengröße."
+    },
+    {
+      "id": "bio", "titel": "Bioabfall", "fraktion": "bio",
+      "kurz": "Küchen- und Gartenreste, aus denen Kompost und Biogas werden.",
+      "ja": ["Obst- und Gemüsereste, Schalen", "Kaffeesatz mit Filter, Teebeutel", "Eierschalen, Brot, Speisereste", "Laub, Rasen, Blumen in kleinen Mengen"],
+      "nein": ["Plastiktüten – auch „kompostierbare“", "Asche, Katzenstreu, Windeln", "Steine, Erde in großen Mengen"],
+      "tipp": "Feuchte Reste in Zeitungspapier einwickeln – dann klebt nichts fest und es riecht weniger."
+    },
+    {
+      "id": "papier", "titel": "Papier & Pappe", "fraktion": "papier",
+      "kurz": "Sauberes, unbeschichtetes Papier.",
+      "ja": ["Zeitungen, Zeitschriften, Prospekte", "Kartons und Schachteln (flach gefaltet)", "Briefumschläge, auch mit Fenster", "Eierkartons, Papiertüten"],
+      "nein": ["Kassenbons (Thermopapier)", "Backpapier, Taschentücher, Küchenrolle", "Getränkekartons und Coffee-to-go-Becher", "Stark verschmutztes Papier"],
+      "tipp": "Kartons zerkleinern oder falten – dann passt viel mehr in die Tonne."
+    },
+    {
+      "id": "verpackung", "titel": "Gelber Sack / Gelbe Tonne", "fraktion": "verpackung",
+      "kurz": "Nur Verpackungen aus Kunststoff, Metall und Verbundstoff.",
+      "ja": ["Joghurtbecher, Folien, Plastiktüten", "Konservendosen, Alufolie, Deckel", "Getränkekartons (Tetrapak)", "Shampoo- und Spülmittelflaschen", "Styropor-Verpackung"],
+      "nein": ["Spielzeug, Eimer, Zahnbürsten (keine Verpackung)", "Elektrogeräte, Batterien", "Papier, Glas, Essensreste"],
+      "tipp": "Löffelrein genügt, ausspülen ist nicht nötig. Teile trennen: Deckel vom Becher, Papierbanderole ab – so kann sortiert werden."
+    },
+    {
+      "id": "glas", "titel": "Altglas", "fraktion": "glas",
+      "kurz": "Glasverpackungen nach Farben getrennt.",
+      "ja": ["Flaschen ohne Pfand (Wein, Öl, Essig)", "Marmeladen-, Gurken-, Babykostgläser", "Parfüm- und Medizinfläschchen (leer)"],
+      "nein": ["Trinkgläser, Vasen, Glasgeschirr", "Spiegel, Fensterglas, Glühbirnen", "Porzellan und Keramik"],
+      "tipp": "Weiß, Braun, Grün trennen – blaues und andersfarbiges Glas kommt ins Grünglas. Deckel ab. Einwurf nur zu den erlaubten Zeiten (meist werktags tagsüber)."
+    },
+    {
+      "id": "pfand", "titel": "Pfand", "fraktion": "pfand",
+      "kurz": "Flaschen und Dosen mit Pfandzeichen gehören zurück in den Handel.",
+      "ja": ["Einweg-Plastikflaschen und Getränkedosen (25 Cent)", "Mehrwegflaschen aus Glas und Kunststoff (meist 8 oder 15 Cent)", "Bierkästen"],
+      "nein": [],
+      "tipp": "Wer Einweg-Pfandflaschen verkauft, muss Einwegflaschen und -dosen der gleichen Materialart zurücknehmen – egal wo sie gekauft wurden. Kleine Läden unter 200 m² nur die Marken, die sie selbst führen."
+    },
+    {
+      "id": "sperrmuell", "titel": "Sperrmüll", "fraktion": "sperrmuell",
+      "kurz": "Große Gegenstände aus dem Haushalt, die nicht in die Tonne passen.",
+      "ja": ["Möbel: Sofa, Schrank, Tisch, Stuhl", "Matratzen, Lattenroste, Teppiche", "Kinderwagen, Koffer, Gartenmöbel"],
+      "nein": ["Bauschutt, Fliesen, Fenster vom Umbau", "Elektrogeräte (eigene Sammlung)", "Autoreifen, Farben, Chemikalien"],
+      "tipp": "Fast überall gibt es eine Abholung auf Anmeldung oder feste Termine, oft ein paar Mal im Jahr kostenlos. Alternativ zum Wertstoffhof bringen. Erst am Vorabend rausstellen und so, dass niemand behindert wird."
+    },
+    {
+      "id": "schadstoff", "titel": "Sondermüll & Schadstoffe", "fraktion": "schadstoff",
+      "kurz": "Alles, was giftig, ätzend oder brennbar ist – nie in die Tonne, den Ausguss oder die Toilette.",
+      "ja": ["Farben, Lacke, Lösungsmittel, Klebstoffe", "Reiniger, Säuren, Laugen, Rohrreiniger", "Pflanzenschutz- und Insektenmittel", "Spraydosen mit Restinhalt", "Quecksilber-Thermometer"],
+      "nein": [],
+      "tipp": "Zu erkennen an den rot umrandeten Warnzeichen auf der Verpackung. Abgabe beim Schadstoffmobil (feste Termine in deinem Ort) oder am Wertstoffhof – für Haushaltsmengen meist kostenlos. In der Originalverpackung lassen, nichts zusammenschütten."
+    },
+    {
+      "id": "elektro", "titel": "Elektrogeräte", "fraktion": "elektro",
+      "kurz": "Alles mit Stecker, Kabel, Akku oder Batterie.",
+      "ja": ["Handys, Laptops, Kabel, Ladegeräte", "Toaster, Wasserkocher, Föhn, Lampen", "Kühlschrank, Waschmaschine, Fernseher", "E-Zigaretten, blinkendes Spielzeug"],
+      "nein": [],
+      "tipp": "Kostenlos am Wertstoffhof. Große Elektro- und Supermärkte nehmen Kleingeräte bis 25 cm auch ohne Neukauf zurück, große Geräte beim Kauf eines neuen. Persönliche Daten vorher löschen."
+    },
+    {
+      "id": "batterie", "titel": "Batterien & Akkus", "fraktion": "batterie",
+      "kurz": "Gehören nie in den Hausmüll – Brandgefahr und wertvolle Rohstoffe.",
+      "ja": ["Haushaltsbatterien und Knopfzellen", "Akkus aus Handys, Werkzeug, Powerbanks", "E-Bike-Akkus (beim Fachhändler)"],
+      "nein": [],
+      "tipp": "Sammelboxen gibt es in jedem Geschäft, das Batterien verkauft. Bei Lithium-Batterien die Pole mit Klebeband abkleben. Autobatterien zurück zum Händler – dafür gibt es Pfand."
+    },
+    {
+      "id": "gruengut", "titel": "Grüngut", "fraktion": "gruengut",
+      "kurz": "Größere Mengen Garten- und Baumschnitt.",
+      "ja": ["Äste, Zweige, Hecken- und Baumschnitt", "Laub und Rasenschnitt in größeren Mengen", "Christbäume (ohne Schmuck)"],
+      "nein": ["Erde und Steine", "Behandeltes Holz", "Plastiktöpfe und Draht"],
+      "tipp": "Viele Gemeinden haben Grüngutplätze oder holen im Frühjahr und Herbst ab. Christbäume werden meist im Januar eingesammelt."
+    },
+    {
+      "id": "wertstoffhof", "titel": "Wertstoffhof", "fraktion": "wertstoffhof",
+      "kurz": "Die Anlaufstelle für fast alles, was nicht in die Tonnen passt.",
+      "ja": ["Elektrogeräte, Batterien, Energiesparlampen", "Altholz, Metallschrott", "Sperrmüll, Grüngut, Styropor", "Bauschutt in kleinen Mengen (oft gegen Gebühr)"],
+      "nein": [],
+      "tipp": "Vorher Öffnungszeiten prüfen – im Reiter „Höfe“ siehst du, was in der Nähe gerade offen hat. Vieles ist für Privathaushalte kostenlos."
+    },
+    {
+      "id": "textil", "titel": "Alte Kleidung & Schuhe", "fraktion": "textil",
+      "kurz": "Tragbare und kaputte Textilien werden getrennt gesammelt.",
+      "ja": ["Kleidung, Bettwäsche, Handtücher", "Schuhe (paarweise zusammengebunden)", "Taschen, Gürtel, Kuscheltiere"],
+      "nein": ["Nasse oder stark verschmutzte Textilien", "Teppiche und Matratzen (Sperrmüll)"],
+      "tipp": "Sauber und trocken in Säcken in den Altkleidercontainer. Gut Erhaltenes lieber spenden oder verkaufen."
+    },
+    {
+      "id": "medikamente", "titel": "Medikamente", "fraktion": "rest",
+      "kurz": "Nie in die Toilette oder den Ausguss – das belastet das Wasser.",
+      "ja": ["In vielen Regionen: Restmüll (wird verbrannt)", "Viele Apotheken nehmen Altmedikamente freiwillig zurück", "Spritzen und Kanülen in einem festen, verschlossenen Behälter in den Restmüll"],
+      "nein": [],
+      "tipp": "Wie es bei dir geregelt ist, sagt dein Entsorger oder die Apotheke."
+    }
+  ],
+  "service": {
+    "titel": "Fragen zu deinem Ort?",
+    "text": "Unter der Behördennummer 115 erreichst du bundesweit die Bürgerservices von Kommunen, Ländern und Bund – auch zu Müllabfuhr, Sperrmüll und Schadstoffen. Falls die Frage dort nicht beantwortet werden kann, wirst du an die zuständige Stelle weitergeleitet.",
+    "nummer": "115",
+    "zeiten": "Mo–Fr 8–18 Uhr · zum Festnetztarif, in vielen Handy-Flatrates enthalten",
+    "quelle": "https://www.115.de"
+  }
+}

@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="app.css?v=87785df">
+  <link rel="stylesheet" href="app.css?v=f8f2090">
 </head>
 <body>
   <div class="app">
@@ -20,7 +20,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
         <span class="ort-text"><strong id="ortName">Standort wird bestimmt …</strong><small id="ortKreis"></small></span>
       </button>
-      <span class="status" id="regionStatus" hidden></span>
+      <span class="status" id="regionStatus" data-zu="region" role="button" tabindex="0" hidden></span>
     </header>
 
     <div class="update-hinweis" id="updateHinweis" role="status" hidden></div>
@@ -105,18 +105,26 @@
       </section>
 
       <!-- Region -->
+      <!-- Regeln (Ratgeber) + Ort -->
       <section class="ansicht" id="ansicht-region" hidden>
-        <h2 class="abschnitt">Deine Region</h2>
-        <div id="regionInfo"></div>
-        <h2 class="abschnitt">Anderen Ort wählen</h2>
-        <div class="suche">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
-          <input id="ortSuche" type="search" placeholder="Ort oder PLZ, z. B. Regenstauf" autocomplete="off" enterkeyhint="search" aria-label="Ort suchen">
-        </div>
-        <ul class="treffer" id="ortTreffer" hidden></ul>
-        <button class="knopf zweit" type="button" id="standortNeu">Aktuellen Standort verwenden</button>
-        <p class="kleingedruckt">Automatisch ermittelte Angaben ohne Gewähr – maßgeblich ist die Abfallsatzung deines Entsorgers.
-          <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+        <h2 class="abschnitt">Regeln – einfach erklärt</h2>
+        <p class="leer">Was gehört wohin? Die wichtigsten Regeln, die in ganz Deutschland gelten. Tippe auf ein Thema.</p>
+        <div id="ratgeber"></div>
+        <div id="serviceKarte"></div>
+
+        <details class="karte ort-details">
+          <summary><strong>Ort ändern</strong><span class="leer" id="ortZusammenfassung"></span></summary>
+          <div id="regionInfo"></div>
+          <div class="suche">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input id="ortSuche" type="search" placeholder="Ort oder PLZ, z. B. Regenstauf" autocomplete="off" enterkeyhint="search" aria-label="Ort suchen">
+          </div>
+          <ul class="treffer" id="ortTreffer" hidden></ul>
+          <button class="knopf zweit" type="button" id="standortNeu">Aktuellen Standort verwenden</button>
+        </details>
+
+        <p class="kleingedruckt">Allgemeine Angaben ohne Gewähr – vor Ort kann es Abweichungen geben, maßgeblich ist die Abfallsatzung deines Entsorgers.
+          <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="kontakt.html">Kontakt</a></p>
       </section>
     </main>
 
@@ -141,18 +149,18 @@
         <span>Höfe</span>
       </button>
       <button type="button" data-zu="region">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-        <span>Region</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></svg>
+        <span>Regeln</span>
       </button>
     </nav>
   </div>
 
-  <script src="js/regeln.js?v=87785df"></script>
-  <script src="js/ort-logik.js?v=87785df"></script>
-  <script src="js/termine.js?v=87785df"></script>
-  <script src="js/barcode.js?v=87785df"></script>
-  <script src="js/plattform.js?v=87785df"></script>
-  <script src="js/oeffnungszeiten.js?v=87785df"></script>
-  <script src="app.js?v=87785df"></script>
+  <script src="js/regeln.js?v=f8f2090"></script>
+  <script src="js/ort-logik.js?v=f8f2090"></script>
+  <script src="js/termine.js?v=f8f2090"></script>
+  <script src="js/barcode.js?v=f8f2090"></script>
+  <script src="js/plattform.js?v=f8f2090"></script>
+  <script src="js/oeffnungszeiten.js?v=f8f2090"></script>
+  <script src="app.js?v=f8f2090"></script>
 </body>
 </html>

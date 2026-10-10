@@ -287,12 +287,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: var(--akzent-hell); border: 1px solid color-mix(in srgb, var(--akzent) 30%, var(--linie)); border-radius: 16px; font-size: 15px; }
 .update-hinweis span { flex: 1 1 180px; }
 
-/* Orts-Knopf oben: pulsiert dezent (heller/dunkler), damit er auffällt */
-.ort-chip { animation: ortPuls 2.6s ease-in-out infinite; cursor: pointer; }
-@keyframes ortPuls {
-  0%, 100% { background: var(--flaeche); border-color: var(--linie); box-shadow: 0 0 0 0 transparent; }
-  50% { background: var(--akzent-hell); border-color: color-mix(in srgb, var(--akzent) 45%, var(--linie)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--akzent) 14%, transparent); }
-}
 .ort-chip.sucht svg { animation: ortSucht .9s ease-in-out infinite; }
 @keyframes ortSucht { 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .ort-chip.sucht svg { animation: none; } } /* Farbpuls bleibt, ist keine Bewegung */
+
+/* Ratgeber */
+.regel { padding: 0; overflow: hidden; }
+.regel summary { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; list-style: none; min-height: 56px; }
+.regel summary::-webkit-details-marker { display: none; }
+.regel summary::after { content: ""; margin-left: auto; width: 9px; height: 9px; border-right: 2px solid var(--leise); border-bottom: 2px solid var(--leise); transform: rotate(45deg); transition: transform .2s; flex: none; }
+.regel[open] summary::after { transform: rotate(-135deg); }
+.regel .r-symbol { width: 34px; height: 40px; flex: none; }
+.regel .r-symbol svg { width: 100%; height: 100%; stroke: none; }
+.regel .r-titel { display: grid; gap: 1px; }
+.regel .r-titel small { color: var(--leise); font-size: 13.5px; font-weight: 400; }
+.regel .r-inhalt { padding: 0 18px 16px; font-size: 15px; }
+.regel h4 { margin: 10px 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); }
+.regel ul { margin: 0; padding-left: 20px; }
+.regel li { margin: 3px 0; }
+.regel .ja li::marker { content: "✓  "; color: var(--akzent); }
+.regel .nein li::marker { content: "✕  "; color: var(--rot); }
+.regel .r-tipp { margin-top: 12px; background: var(--flaeche-2); border-radius: 12px; padding: 10px 12px; }
+.service { display: grid; gap: 6px; }
+.service .nummer { font-size: 30px; font-weight: 800; letter-spacing: .02em; }
+.ort-details summary { cursor: pointer; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.ort-details[open] summary { margin-bottom: 10px; }
+.ort-details .suche { margin: 12px 0 8px; box-shadow: none; }
+.status[data-zu] { cursor: pointer; }
+.service p { margin: 0; }
+.service .nummer { color: var(--akzent); text-decoration: none; line-height: 1.1; }
