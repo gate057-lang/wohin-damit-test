@@ -2,12 +2,11 @@
    Programmdateien kommen bevorzugt frisch aus dem Netz, ohne Netz aus dem
    Zwischenspeicher. Lexikon und Grundregeln sind so auch offline verfügbar.
    API-Aufrufe fasst der Service Worker nie an. */
-const VERSION = 'wohin-test-3594782';
+const VERSION = 'wohin-test-d4f4323';
 const HUELLE = [
-  './', './index.html', './app.css', './app.js', './manifest.webmanifest',
+  './', './index.html', './app.css', './app.js',
   './js/regeln.js', './js/ort-logik.js', './js/termine.js', './js/barcode.js', './js/plattform.js', './js/oeffnungszeiten.js',
   './daten/fraktionen.json', './daten/lexikon.json', './daten/ratgeber.json',
-  './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon-180.png', './icons/favicon-32.png',
   './impressum.html', './datenschutz.html', './kontakt.html', './rechtstexte.css',
 ];
 
@@ -26,6 +25,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin || url.pathname.includes('/api/')) return;
+  // Symbole und Manifest nie über den Service Worker – das Betriebssystem soll sie direkt laden
+  if (/\/icons\/|webmanifest$|apple-touch-icon|favicon/.test(url.pathname)) return;
   e.respondWith(
     fetch(e.request)
       .then((antwort) => {
