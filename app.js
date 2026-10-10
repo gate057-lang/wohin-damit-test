@@ -27,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=f5db2c7').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=f5db2c7').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=2232186').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=2232186').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);
@@ -220,6 +220,51 @@ async function fotoAuswerten(datei) {
     laden(null);
     $('#fotoEingabe').value = '';
   }
+}
+
+/* ------------------------------ Strichcode ------------------------------ */
+
+async function barcodeZeigen(code) {
+  code = String(code || '').replace(/\D/g, '');
+  if (code.length < 8) { alert('Bitte die 8- oder 13-stellige Nummer unter dem Strichcode eingeben.'); return; }
+  laden('Produkt wird gesucht …');
+  try {
+    const p = await Barcode.produkt(code);
+    if (!p) {
+      $('#ergebnisInhalt').innerHTML = `<article class="karte"><p><strong>Produkt nicht gefunden</strong> (${esc(code)})</p>
+        <p class="leer">Mach am besten ein Foto der Verpackung – das klappt auch ohne Strichcode.</p>
+        <div class="aktionen"><label class="knopf" for="fotoEingabe">Foto machen</label></div></article>`;
+    } else if (!p.teile.length) {
+      $('#ergebnisInhalt').innerHTML = `<article class="karte"><p><strong>${esc(p.name)}</strong>${p.marke ? ' · ' + esc(p.marke) : ''}</p>
+        <p class="leer">Zu diesem Produkt sind keine Verpackungsangaben hinterlegt. Mach ein Foto der Verpackung.</p>
+        <div class="aktionen"><label class="knopf" for="fotoEingabe">Foto machen</label></div></article>`;
+    } else {
+      const zeilen = p.teile.map((t) => {
+        const e = Regeln.entscheide({ n: t.teil, f: t.fraktion, h: '' }, Z.profil, Z.stamm);
+        return `<li><span class="punkt" style="background:${esc(e.farbe)}"></span>${esc(t.teil)}<small class="leer">&nbsp;${esc(t.material)}</small><span class="ziel"><strong>${esc(e.behaelter)}</strong></span></li>`;
+      }).join('');
+      const pfand = p.teile.some((t) => t.pfand)
+        ? `<div class="region-hinweis">Getränkedosen und Einwegflaschen aus Kunststoff haben meist Pfand – achte auf das Pfandzeichen und bring sie zum Automaten.</div>` : '';
+      $('#ergebnisInhalt').innerHTML = `<article class="ergebnis">
+        <div class="produkt-kopf"><p class="was">${esc(p.marke || 'Produkt')}</p><p class="wohin">${esc(p.name)}</p></div>
+        <div class="ergebnis-koerper">${pfand}<ul class="teile">${zeilen}</ul>
+          <p class="quelle">Verpackungsangaben: Open Food Facts (ODbL). Teile möglichst voneinander trennen.</p></div></article>`;
+    }
+    zeige('ergebnis');
+  } catch (f) { alert(f.message); } finally { laden(null); }
+}
+
+async function barcodeFoto(datei) {
+  if (!datei) return;
+  try {
+    const code = await Barcode.ausFoto(datei);
+    if (code) barcodeZeigen(code);
+    else {
+      const n = prompt('Ich konnte den Strichcode nicht lesen. Gib die Nummer darunter ein:');
+      if (n) barcodeZeigen(n);
+    }
+  } catch { const n = prompt('Gib die Nummer unter dem Strichcode ein:'); if (n) barcodeZeigen(n); }
+  finally { $('#barcodeFoto').value = ''; }
 }
 
 /* ------------------------------ Suche ------------------------------ */
@@ -549,6 +594,14 @@ function verdrahte() {
   });
 
   $('#ortChip').addEventListener('click', () => zeige('region'));
+
+  // Strichcode
+  $('#barcodeKnopf').hidden = !Barcode.kannErkennen();
+  $('#barcodeFoto').addEventListener('change', (e) => barcodeFoto(e.target.files[0]));
+  $('#barcodeNummer').addEventListener('click', () => {
+    const n = prompt('Nummer unter dem Strichcode (8 oder 13 Ziffern):');
+    if (n) barcodeZeigen(n);
+  });
 
   // Termine
   $('#icsLaden').addEventListener('click', () => {

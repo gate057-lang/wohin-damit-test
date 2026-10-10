@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="app.css?v=f5db2c7">
+  <link rel="stylesheet" href="app.css?v=2232186">
 </head>
 <body>
   <div class="app">
@@ -41,6 +41,14 @@
           <input id="suchFeld" type="search" placeholder="Oder suchen: Pizzakarton, Akku, Sofa …" autocomplete="off" enterkeyhint="search" aria-label="Gegenstand suchen">
         </div>
         <ul class="treffer" id="suchTreffer" role="listbox" hidden></ul>
+
+        <div class="zusatz">
+          <label class="knopf zweit klein" for="barcodeFoto" id="barcodeKnopf">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg> Strichcode fotografieren
+          </label>
+          <button class="knopf zweit klein" type="button" id="barcodeNummer">Strichcode-Nummer eingeben</button>
+        </div>
+        <input type="file" id="barcodeFoto" accept="image/*" capture="environment" hidden>
 
         <div class="schnell" id="schnellwahl" aria-label="Häufige Fragen"></div>
 
@@ -137,11 +145,12 @@
     </nav>
   </div>
 
-  <script src="js/regeln.js?v=f5db2c7"></script>
-  <script src="js/ort-logik.js?v=f5db2c7"></script>
-  <script src="js/termine.js?v=f5db2c7"></script>
-  <script src="js/plattform.js?v=f5db2c7"></script>
-  <script src="js/oeffnungszeiten.js?v=f5db2c7"></script>
-  <script src="app.js?v=f5db2c7"></script>
+  <script src="js/regeln.js?v=2232186"></script>
+  <script src="js/ort-logik.js?v=2232186"></script>
+  <script src="js/termine.js?v=2232186"></script>
+  <script src="js/barcode.js?v=2232186"></script>
+  <script src="js/plattform.js?v=2232186"></script>
+  <script src="js/oeffnungszeiten.js?v=2232186"></script>
+  <script src="app.js?v=2232186"></script>
 </body>
 </html>

@@ -267,3 +267,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .klein-feld { box-shadow: none; margin: 10px 0 4px; }
 .klein-feld input { padding-left: 2px; }
 .karte > p:first-child { margin-top: 0; }
+
+.zusatz { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.zusatz .knopf svg { width: 20px; height: 20px; }
+.produkt-kopf { padding: 18px 20px; border-bottom: 1px solid var(--linie); }
+.produkt-kopf .was { margin: 0; color: var(--leise); font-size: 14px; }
+.produkt-kopf .wohin { margin: 2px 0 0; font-size: 22px; font-weight: 750; }
+.teile .ziel strong { color: var(--tinte); }
+.produkt-kopf + .ergebnis-koerper .teile:first-child, .region-hinweis + .teile { margin-top: 0; }
+.produkt-kopf + .ergebnis-koerper .teile:first-child { border-top: 0; }
