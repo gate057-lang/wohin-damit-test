@@ -1,4 +1,4 @@
 # Wohin damit? – Testversion
 
-Automatisch erzeugte Testfassung der Oberfläche (Stand 8263418).
+Automatisch erzeugte Testfassung der Oberfläche (Stand 87785df).
 Aufruf: https://gate057-lang.github.io/wohin-damit-test/

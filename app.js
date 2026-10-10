@@ -27,8 +27,8 @@ const SCHNELL = ['Pizzakarton', 'Kassenbon', 'Akku', 'Tetrapak', 'Glühbirne', '
 
 async function ladeDaten() {
   const [stamm, lexikon] = await Promise.all([
-    fetch('daten/fraktionen.json?v=8263418').then((r) => r.json()),
-    fetch('daten/lexikon.json?v=8263418').then((r) => r.json()),
+    fetch('daten/fraktionen.json?v=87785df').then((r) => r.json()),
+    fetch('daten/lexikon.json?v=87785df').then((r) => r.json()),
   ]);
   Z.stamm = stamm;
   Z.index = Regeln.baueIndex(lexikon);

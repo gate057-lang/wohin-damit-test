@@ -98,13 +98,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .kamera:active { transform: scale(.96); }
 .kamera svg { width: 64px; height: 64px; stroke-width: 1.6; }
 .kamera-text { font-weight: 700; font-size: 18px; letter-spacing: .01em; }
+/* Ring um den Foto-Knopf: pocht in der Farbe (hell ↔ kräftig grün), bleibt dabei an Ort und Stelle.
+   Nur Farbe, keine Bewegung – deshalb auch bei „Bewegung reduzieren“ aktiv. */
 .kamera-ring {
-  position: absolute; inset: -12px; border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--akzent) 35%, transparent);
-  animation: ring 2.8s ease-out infinite;
+  position: absolute; inset: -13px; border-radius: 50%;
+  border: 4px solid color-mix(in srgb, var(--akzent) 25%, transparent);
+  animation: ringPochen 2.4s ease-in-out infinite;
+  pointer-events: none;
 }
-@keyframes ring { 0% { transform: scale(.94); opacity: 1; } 100% { transform: scale(1.12); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .kamera-ring, .status.laeuft::before { animation: none; } }
+@keyframes ringPochen {
+  0%, 100% { border-color: color-mix(in srgb, var(--akzent) 22%, transparent); box-shadow: 0 0 0 0 transparent; }
+  50% { border-color: var(--akzent); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--akzent) 35%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .status.laeuft::before { animation: none; } }
 
 .suche {
   display: flex; align-items: center; gap: 10px;
@@ -289,4 +295,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .ort-chip.sucht svg { animation: ortSucht .9s ease-in-out infinite; }
 @keyframes ortSucht { 50% { transform: translateY(-3px); } }
-@media (prefers-reduced-motion: reduce) { .ort-chip, .ort-chip.sucht svg { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ort-chip.sucht svg { animation: none; } } /* Farbpuls bleibt, ist keine Bewegung */
